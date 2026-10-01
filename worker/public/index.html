@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ad Review</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    padding: 2rem;
+  }
+
+  /* Header */
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .page-header h1 {
+    font-size: 1.5rem;
+    color: #fff;
+    margin-right: auto;
+  }
+  select, button, input[type="text"], input[type="number"] {
+    font-family: inherit;
+    font-size: 0.9rem;
+  }
+  #batch-select {
+    background: #161616;
+    color: #e0e0e0;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    min-width: 220px;
+  }
+  #batch-select:focus { outline: none; border-color: #444; }
+  .btn {
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-success { background: #15803d; color: #fff; }
+  .btn-danger { background: #b91c1c; color: #fff; }
+
+  /* Cards */
+  .card {
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #2a2a2a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .title-block { min-width: 0; }
+  .card-header h2 { font-size: 1.1rem; color: #fff; margin-bottom: 0.25rem; }
+  .filename { font-size: 0.75rem; color: #666; font-family: monospace; }
+  .status-badge {
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0.7rem;
+    white-space: nowrap;
+  }
+  .status-badge.passed { background: #14301f; color: #7ce5a4; }
+  .status-badge.needs-human-review { background: #382515; color: #ffbe74; }
+  .status-badge.pending-review { background: #2a2a2a; color: #c9c9c9; }
+  .images {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #111;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .img-wrapper { position: relative; flex-shrink: 0; }
+  .img-wrapper img {
+    max-height: 500px;
+    width: auto;
+    border-radius: 8px;
+    display: block;
+  }
+  .ratio-label {
+    position: absolute;
+    top: 8px; left: 8px;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+  .img-missing {
+    width: 200px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .placeholder {
+    color: #555;
+    font-size: 0.85rem;
+    text-align: center;
+    border: 1px dashed #333;
+    border-radius: 8px;
+    padding: 2rem;
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .review-section {
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .review-block {
+    background: #111;
+    border: 1px solid #242424;
+    border-radius: 10px;
+    padding: 1rem;
+  }
+  .review-block h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #888;
+    margin-bottom: 0.6rem;
+  }
+  ul { list-style: disc; padding-left: 1rem; }
+  li { color: #ddd; font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.35rem; }
+  .empty { color: #666; font-size: 0.85rem; line-height: 1.5; }
+  .copy-section {
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+  }
+  .copy-block h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #888;
+    margin-bottom: 0.5rem;
+  }
+  .primary-text { font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; }
+  .headline-text { font-size: 1.1rem; font-weight: 600; color: #fff; }
+  .notes-section { padding: 1rem 1.5rem; border-top: 1px solid #2a2a2a; }
+  textarea {
+    width: 100%;
+    min-height: 60px;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    color: #e0e0e0;
+    padding: 0.75rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    resize: vertical;
+  }
+  textarea:focus { outline: none; border-color: #444; }
+
+  /* Empty/loading states */
+  .state-message {
+    color: #666;
+    font-size: 0.95rem;
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal {
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 2rem;
+    width: 440px;
+    max-width: 95vw;
+  }
+  .modal h2 { font-size: 1.2rem; color: #fff; margin-bottom: 1.5rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #888;
+    margin-bottom: 0.4rem;
+  }
+  .form-group input {
+    width: 100%;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    color: #e0e0e0;
+    padding: 0.6rem 0.75rem;
+  }
+  .form-group input:focus { outline: none; border-color: #444; }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid #2a2a2a;
+    color: #aaa;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .btn-ghost:hover { border-color: #444; color: #e0e0e0; }
+
+  /* Approve CLI modal */
+  .cli-command {
+    width: 100%;
+    min-height: 80px;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    color: #7ce5a4;
+    padding: 0.75rem;
+    font-family: monospace;
+    font-size: 0.8rem;
+    resize: none;
+    cursor: text;
+  }
+  .cli-command:focus { outline: none; border-color: #444; }
+  .copy-status { font-size: 0.8rem; color: #7ce5a4; min-height: 1.2em; margin-top: 0.5rem; }
+  .error-msg { color: #f87171; }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>Ad Review</h1>
+  <select id="batch-select"><option value="">Loading batches…</option></select>
+  <button class="btn btn-primary" id="btn-generate">Generate</button>
+  <button class="btn btn-success" id="btn-approve">Approve</button>
+</header>
+
+<div id="cards-container"><p class="state-message">Select a batch to load ads.</p></div>
+
+<!-- Approve CLI modal -->
+<div class="modal-overlay" id="approve-modal">
+  <div class="modal">
+    <h2>Ready to Approve</h2>
+    <p style="color:#aaa;font-size:0.85rem;margin-bottom:1rem;">Run this command locally to package and upload to Google Drive:</p>
+    <div class="form-group">
+      <label>CLI Command</label>
+      <textarea class="cli-command" id="approve-cli-command" readonly></textarea>
+    </div>
+    <div class="copy-status" id="approve-copy-status"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="btn-close-approve">Close</button>
+      <button class="btn btn-success" id="btn-copy-cli">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generate CLI modal -->
+<div class="modal-overlay" id="generate-modal">
+  <div class="modal">
+    <h2>Generate Ads</h2>
+    <p style="color:#aaa;font-size:0.85rem;margin-bottom:1rem;">Generation runs locally. Configure parameters then copy the command to run in your terminal:</p>
+    <div class="form-group">
+      <label for="gen-client">Client</label>
+      <input type="text" id="gen-client" placeholder="client-name">
+    </div>
+    <div class="form-group">
+      <label for="gen-count">Count</label>
+      <input type="number" id="gen-count" value="6" min="1">
+    </div>
+    <div class="form-group">
+      <label for="gen-avatars">Sub-avatars (comma-separated)</label>
+      <input type="text" id="gen-avatars" placeholder="sub-avatar-one, sub-avatar-two">
+    </div>
+    <div class="form-group">
+      <label for="gen-messaging">Messaging concepts (comma-separated)</label>
+      <input type="text" id="gen-messaging" placeholder="i-accidentally-achieved-x, make-hard-thing-easy">
+    </div>
+    <div class="form-group">
+      <label>CLI Command</label>
+      <textarea class="cli-command" id="gen-cli-command" readonly></textarea>
+    </div>
+    <div class="copy-status" id="gen-copy-status"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="btn-cancel-generate">Close</button>
+      <button class="btn btn-primary" id="btn-copy-generate">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------------
+  let currentBatch = null;
+
+  // ---------------------------------------------------------------------------
+  // DOM refs
+  // ---------------------------------------------------------------------------
+  const batchSelect = document.getElementById('batch-select');
+  const cardsContainer = document.getElementById('cards-container');
+  const btnGenerate = document.getElementById('btn-generate');
+  const btnApprove = document.getElementById('btn-approve');
+  const generateModal = document.getElementById('generate-modal');
+  const genCliCommand = document.getElementById('gen-cli-command');
+  const genCopyStatus = document.getElementById('gen-copy-status');
+  const approveModal = document.getElementById('approve-modal');
+  const approveCliCommand = document.getElementById('approve-cli-command');
+  const approveCopyStatus = document.getElementById('approve-copy-status');
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+  function splitCsv(str) {
+    return str.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  function shellQuote(value) {
+    return "'" + String(value).replace(/'/g, "'\"'\"'") + "'";
+  }
+
+  function statusCssClass(status) {
+    return {
+      passed: 'passed',
+      needs_human_review: 'needs-human-review',
+      pending_review: 'pending-review',
+    }[status] || 'pending-review';
+  }
+
+  function statusLabel(status) {
+    return (status || 'pending_review').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  // Create a text node wrapped in a given element type
+  function el(tag, text, className) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function showState(message) {
+    cardsContainer.innerHTML = '';
+    cardsContainer.appendChild(el('p', message, 'state-message'));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Review detail extraction
+  // ---------------------------------------------------------------------------
+  function collectReviewDetails(entry) {
+    const copyReview = entry.copy_review || {};
+    const reviewResults = entry.review_results || {};
+
+    const failures = [];
+    const manualFlags = [];
+    const summaries = [];
+    const ratioStatuses = [];
+
+    // Copy review
+    for (const failure of (copyReview.hard_rule_failures || [])) {
+      if (failure && typeof failure === 'object') {
+        const msg = (failure.message || '').trim();
+        if (msg) failures.push('Copy: ' + msg);
+      }
+    }
+    for (const flag of (copyReview.manual_flags || [])) {
+      manualFlags.push(String(flag));
+    }
+    if (copyReview.summary) {
+      summaries.push('Copy: ' + copyReview.summary);
+    }
+
+    // Per-ratio review results
+    for (const [ratio, result] of Object.entries(reviewResults).sort()) {
+      if (result.status) ratioStatuses.push(ratio + ': ' + result.status);
+      for (const failure of (result.hard_rule_failures || [])) {
+        if (failure && typeof failure === 'object') {
+          const msg = (failure.message || '').trim();
+          if (msg) failures.push(ratio + ': ' + msg);
+        }
+      }
+      for (const flag of (result.manual_flags || [])) {
+        manualFlags.push(ratio + ': ' + flag);
+      }
+      if (result.summary) summaries.push(ratio + ': ' + result.summary);
+    }
+
+    function dedupe(arr) {
+      const seen = new Set();
+      return arr.filter(s => {
+        const c = s.trim();
+        if (!c || seen.has(c)) return false;
+        seen.add(c);
+        return true;
+      });
+    }
+
+    return {
+      ratioStatuses: dedupe(ratioStatuses),
+      failures: dedupe(failures),
+      manualFlags: dedupe(manualFlags),
+      summaries: dedupe(summaries),
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build a review list element
+  // ---------------------------------------------------------------------------
+  function buildList(items, emptyLabel, cssClass) {
+    if (!items.length) {
+      return el('p', emptyLabel, cssClass + ' empty');
+    }
+    const ul = document.createElement('ul');
+    ul.className = cssClass;
+    for (const item of items) {
+      ul.appendChild(el('li', item));
+    }
+    return ul;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build a review block
+  // ---------------------------------------------------------------------------
+  function buildReviewBlock(title, items, emptyLabel, cssClass) {
+    const block = el('div', undefined, 'review-block');
+    block.appendChild(el('h3', title));
+    block.appendChild(buildList(items, emptyLabel, cssClass));
+    return block;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build an image wrapper
+  // ---------------------------------------------------------------------------
+  function buildImageWrapper(url, label) {
+    const wrapper = document.createElement('div');
+    if (url) {
+      wrapper.className = 'img-wrapper';
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = label;
+      const lbl = el('span', label, 'ratio-label');
+      wrapper.appendChild(img);
+      wrapper.appendChild(lbl);
+    } else {
+      wrapper.className = 'img-wrapper img-missing';
+      const ph = el('div', label + ' missing', 'placeholder');
+      wrapper.appendChild(ph);
+    }
+    return wrapper;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build a single ad card
+  // ---------------------------------------------------------------------------
+  function buildCard(entry) {
+    const card = el('div', undefined, 'card');
+
+    // Header
+    const header = el('div', undefined, 'card-header');
+    const titleBlock = el('div', undefined, 'title-block');
+
+    const title = entry.visual_format && entry.messaging_concept
+      ? entry.visual_format + ' \u00d7 ' + entry.messaging_concept
+      : (entry.ad_name || 'Untitled');
+    titleBlock.appendChild(el('h2', title));
+
+    if (entry.angle_name) {
+      titleBlock.appendChild(el('span', entry.angle_name, 'filename'));
+    }
+
+    const badge = el('span', statusLabel(entry.review_status), 'status-badge ' + statusCssClass(entry.review_status));
+
+    header.appendChild(titleBlock);
+    header.appendChild(badge);
+    card.appendChild(header);
+
+    // Images
+    const images = el('div', undefined, 'images');
+    const imageUrls = entry.image_urls || {};
+    images.appendChild(buildImageWrapper(imageUrls['9x16'] || null, '9:16'));
+    images.appendChild(buildImageWrapper(imageUrls['1x1'] || null, '1:1'));
+    card.appendChild(images);
+
+    // Review section
+    const details = collectReviewDetails(entry);
+    const reviewSection = el('div', undefined, 'review-section');
+    reviewSection.appendChild(buildReviewBlock('Ratio Status', details.ratioStatuses, 'No ratio review data yet.', 'status-list'));
+    reviewSection.appendChild(buildReviewBlock('Hard Rule Failures', details.failures, 'No hard-rule failures recorded.', 'failure-list'));
+    reviewSection.appendChild(buildReviewBlock('Manual Flags', details.manualFlags, 'No manual flags recorded.', 'flag-list'));
+    reviewSection.appendChild(buildReviewBlock('Review Notes', details.summaries, 'No review summary available.', 'summary-list'));
+    card.appendChild(reviewSection);
+
+    // Copy section
+    const copySection = el('div', undefined, 'copy-section');
+    const primaryBlock = el('div', undefined, 'copy-block');
+    primaryBlock.appendChild(el('h3', 'Primary Text'));
+    primaryBlock.appendChild(el('p', entry.primary_text || '', 'primary-text'));
+    const headlineBlock = el('div', undefined, 'copy-block');
+    headlineBlock.appendChild(el('h3', 'Headline'));
+    headlineBlock.appendChild(el('p', entry.headline || '', 'headline-text'));
+    copySection.appendChild(primaryBlock);
+    copySection.appendChild(headlineBlock);
+    card.appendChild(copySection);
+
+    // Notes
+    const notesSection = el('div', undefined, 'notes-section');
+    const ta = document.createElement('textarea');
+    ta.placeholder = 'Manual notes…';
+    notesSection.appendChild(ta);
+    card.appendChild(notesSection);
+
+    return card;
+  }
+
+  // ---------------------------------------------------------------------------
+  // API calls
+  // ---------------------------------------------------------------------------
+  async function loadBatches() {
+    try {
+      const res = await fetch('/api/batches');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const batches = data.batches || [];
+      batchSelect.innerHTML = '';
+      if (!batches.length) {
+        batchSelect.appendChild(new Option('No batches found', ''));
+        showState('No batches found. Use Generate to create one.');
+        return;
+      }
+      for (const name of batches) {
+        batchSelect.appendChild(new Option(name, name));
+      }
+      await loadBatch(batches[0]);
+    } catch (err) {
+      batchSelect.innerHTML = '';
+      batchSelect.appendChild(new Option('Error loading batches', ''));
+      showState('Failed to load batches: ' + err.message);
+    }
+  }
+
+  async function loadBatch(name) {
+    if (!name) return;
+    currentBatch = name;
+    showState('Loading ' + name + '…');
+    try {
+      const res = await fetch('/api/batches/' + encodeURIComponent(name));
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      renderCards(data.entries || []);
+    } catch (err) {
+      showState('Failed to load batch: ' + err.message);
+    }
+  }
+
+  function renderCards(entries) {
+    cardsContainer.innerHTML = '';
+    if (!entries.length) {
+      showState('No ads found in this batch.');
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    for (const entry of entries) {
+      frag.appendChild(buildCard(entry));
+    }
+    cardsContainer.appendChild(frag);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Generate — CLI command builder
+  // ---------------------------------------------------------------------------
+  function buildGenerateCommand() {
+    const client = document.getElementById('gen-client').value.trim() || '{client}';
+    const count = document.getElementById('gen-count').value.trim() || '6';
+    const subAvatars = splitCsv(document.getElementById('gen-avatars').value);
+    const messaging = splitCsv(document.getElementById('gen-messaging').value);
+
+    const parts = [
+      `--client ${shellQuote(client)}`,
+      `--count ${shellQuote(count)}`,
+    ];
+
+    for (const av of subAvatars) {
+      parts.push(`--sub-avatar ${shellQuote(av)}`);
+    }
+    if (messaging.length) {
+      parts.push(`--messaging ${messaging.map(shellQuote).join(' ')}`);
+    }
+    parts.push('--upload-r2');
+
+    return `cd scripts && uv run python generate-ads.py \\\n  ${parts.join(' \\\n  ')}`;
+  }
+
+  function updateGenerateCli() {
+    genCliCommand.value = buildGenerateCommand();
+  }
+
+  function showGenerateModal() {
+    genCopyStatus.textContent = '';
+    updateGenerateCli();
+    generateModal.classList.add('visible');
+  }
+
+  function hideGenerateModal() {
+    generateModal.classList.remove('visible');
+  }
+
+  async function copyGenerateCommand() {
+    try {
+      await navigator.clipboard.writeText(genCliCommand.value);
+      genCopyStatus.textContent = 'Copied!';
+      setTimeout(() => { genCopyStatus.textContent = ''; }, 2000);
+    } catch (_) {
+      genCliCommand.select();
+      genCopyStatus.textContent = 'Press Ctrl+C / Cmd+C to copy.';
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Approve — show CLI command modal
+  // ---------------------------------------------------------------------------
+  function showApproveModal() {
+    if (!currentBatch) return;
+    const client = document.getElementById('gen-client').value.trim() || '{client}';
+    const batchFolder = `clients/${client}/ads/statics/${currentBatch}`;
+    const cmd = `uv run python scripts/ad_set_builder.py --folder ${shellQuote(batchFolder)} --upload --csv`;
+    approveCliCommand.value = cmd;
+    approveCopyStatus.textContent = '';
+    approveModal.classList.add('visible');
+  }
+
+  function hideApproveModal() {
+    approveModal.classList.remove('visible');
+  }
+
+  async function copyCliCommand() {
+    try {
+      await navigator.clipboard.writeText(approveCliCommand.value);
+      approveCopyStatus.textContent = 'Copied!';
+      setTimeout(() => { approveCopyStatus.textContent = ''; }, 2000);
+    } catch (_) {
+      approveCliCommand.select();
+      approveCopyStatus.textContent = 'Press Ctrl+C / Cmd+C to copy.';
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Event listeners
+  // ---------------------------------------------------------------------------
+  batchSelect.addEventListener('change', () => loadBatch(batchSelect.value));
+
+  btnGenerate.addEventListener('click', showGenerateModal);
+  btnApprove.addEventListener('click', showApproveModal);
+  document.getElementById('btn-cancel-generate').addEventListener('click', hideGenerateModal);
+  document.getElementById('btn-copy-generate').addEventListener('click', copyGenerateCommand);
+  document.getElementById('btn-close-approve').addEventListener('click', hideApproveModal);
+  document.getElementById('btn-copy-cli').addEventListener('click', copyCliCommand);
+
+  // Rebuild CLI command whenever inputs change
+  ['gen-client', 'gen-count', 'gen-avatars', 'gen-messaging'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateGenerateCli);
+  });
+
+  generateModal.addEventListener('click', e => {
+    if (e.target === generateModal) hideGenerateModal();
+  });
+  approveModal.addEventListener('click', e => {
+    if (e.target === approveModal) hideApproveModal();
+  });
+
+  // Close modals on Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (generateModal.classList.contains('visible')) hideGenerateModal();
+      if (approveModal.classList.contains('visible')) hideApproveModal();
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // Init
+  // ---------------------------------------------------------------------------
+  loadBatches();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "ad-review-worker",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3",
+    "@cloudflare/workers-types": "^4",
+    "typescript": "^5"
+  }
+}

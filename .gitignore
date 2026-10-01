@@ -1,0 +1,14 @@
+.playwright-mcp/
+.worktrees/
+.DS_Store
+*/__pycache__/*
+
+.env
+.gdrive-token.json
+
+generated-ads/
+scripts/generated-ads
+clients/*/ads/*
+.ralph-logs/
+worker/node_modules/
+worker/.wrangler/

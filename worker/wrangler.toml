@@ -1,0 +1,19 @@
+name = "ad-review"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "ad-review"
+preview_bucket_name = "ad-review-dev"
+
+[assets]
+directory = "./public"
+
+[vars]
+ENVIRONMENT = "production"
+
+# Secrets (set via: wrangler secret put OPENROUTER_API_KEY)
+# GOOGLE_CLIENT_ID
+# GOOGLE_CLIENT_SECRET
