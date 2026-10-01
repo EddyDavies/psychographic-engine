@@ -2,28 +2,29 @@
 
 Markdown knowledge base for creative strategy. AI agents browse it for brand context when writing copy, building briefs, or planning tests. This is a reference-only repo; it is not programmatically read by the meta-ads app.
 
-## How This Repo Is Organized
+## Using This Template
 
-Client data never lives on `main`. Each client gets its own branch:
+This repo is a template. It ships the method (prompts, scripts, frameworks) and a blank client scaffold (`clients/_template/`), but no client data.
 
-- **`main`** holds only shared assets: prompt templates (`prompts/`), pipeline scripts (`scripts/`), and the blank client scaffold (`clients/_template/`).
-- **`client/{name}`** branches (e.g. `client/acme`) contain everything from `main` plus a single `clients/{name}/` directory with that client's filled-in knowledge base.
+Client knowledge bases hold confidential material (reviews, briefs, offers, test results), so keep them out of public forks:
 
-Rules of the road:
+1. Create your own **private** copy: use GitHub's "Use this template" button, or clone this repo and push it to a new private repository.
+2. Add one `clients/{name}/` directory per client inside that private copy.
+3. To pick up method improvements later, add this repo as a remote and merge from it:
 
-- Never commit client data to `main`. If a script or prompt improvement happens on a client branch, cherry-pick or port it back to `main` so every client benefits.
-- To pull shared improvements into a client branch, run `git merge main` from that branch.
-- Never merge a client branch into `main`.
+```bash
+git remote add upstream https://github.com/EddyDavies/psychographic-engine.git
+git fetch upstream && git merge upstream/main
+```
+
+If you improve a prompt, script or framework doc and want to send it back, open a pull request against this repo from a branch that contains no `clients/{name}/` data.
 
 ## Getting Started With a New Client
 
 ```bash
-git checkout main && git pull
-git checkout -b client/{client-name}
 cp -r clients/_template clients/{client-name}
 git add clients/{client-name}
 git commit -m "Scaffold {client-name} client"
-git push -u origin client/{client-name}
 ```
 
 Then fill in the scaffold, in this order:
@@ -35,12 +36,12 @@ Then fill in the scaffold, in this order:
 5. Run `prompts/research/review-mining.md` to extract customer language
 6. Populate `products/` with one file per product
 7. Build avatars from research (core avatars first, then sub-avatars)
-8. Derive angles from avatars; each sub-avatar gets `angle-{slug}.md` files
+8. Derive angles with `prompts/angles/generate-angles.md`; each sub-avatar gets `angle-{slug}.md` files with frontmatter
 9. Document shared mechanisms in `products/shared-mechanisms.md`
 
 ## How It Connects to meta-ads
 
-The [meta-ads](../meta-ads) app stores ad records, metrics, renders, and generated copy. This repo stores the strategic context that informs those outputs.
+A separate ads app (meta-ads, not included here) stores ad records, metrics, renders, and generated copy. This repo stores the strategic context that informs those outputs.
 
 **Decision rule:** If it changes per-ad-run, it goes in the DB. If it's stable strategic context, it goes here.
 
@@ -50,9 +51,9 @@ See [DATABASE-MAPPING.md](DATABASE-MAPPING.md) for the full field-level mapping 
 
 ```
 prompts/           Reusable AI prompt templates for research and testing workflows
-scripts/           Ad generation, review, and import tooling
-clients/_template/ Copy this folder to onboard a new client (on a client branch)
-clients/{name}/    Per-client directory, only present on that client's branch
+scripts/           Ad generation, review, import tooling, and check-knowledge.py (frontmatter and tracker checker)
+clients/_template/ Copy this folder to onboard a new client
+clients/{name}/    Per-client directory (keep these in your private copy)
 ```
 
 Within each client directory:
@@ -63,7 +64,7 @@ Within each client directory:
 | `products/`  | Product knowledge with Evolve framework sections            |
 | `offers/`    | Offer/bundle positioning                                   |
 | `avatars/`   | Psychographic portraits using Core 5 framework              |
-| `angles/`    | Strategic angles with hooks and test status                  |
+| `angles/`    | Archive of pre-Evolve angles; new angles live under avatars  |
 | `concepts/`  | Marketing frameworks, formats (static/video/email)          |
 | `testing/`   | Test learnings and next directions                          |
 | `research/`  | Raw research output                                        |
@@ -105,11 +106,12 @@ Notes:
 
 ## Working With AI Agents
 
-- Check out the client's branch first; `main` has no client data
+- Work inside the client's `clients/{name}/` directory in your private copy
 - Read `products/` + `avatars/` for context before generating copy
 - Reference `avatars/core-{name}/ranked-angles.md` for prioritized angles
 - Check `testing/learnings.md` before proposing repeat tests
 - Check `testing/creative-tracker.csv` to avoid duplicating combinations
+- Run `uv run python scripts/check-knowledge.py` before committing
 - Use `concepts/marketing-frameworks.md` to match framework to awareness level
 
 ## Ad Review Worker
@@ -119,8 +121,8 @@ A Cloudflare Worker (`worker/`) serves the ad review UI. It reads generated ad b
 ### Setup
 
 ```bash
-# Worker (Node.js 22+)
-cd worker && npm install
+# Worker (Node.js 22+, pnpm)
+cd worker && pnpm install
 
 # Python scripts (requires uv: https://docs.astral.sh/uv/)
 cd scripts && uv sync
@@ -131,10 +133,10 @@ Copy `.env.example` to `.env` in the project root and fill in the Cloudflare, Op
 ### Deploy the worker
 
 ```bash
-cd worker && npx wrangler deploy
+cd worker && pnpm run deploy
 ```
 
-Node.js can't reach Cloudflare through NordVPN; disconnect the VPN before running wrangler commands.
+Some VPNs block Node.js from reaching Cloudflare; if wrangler times out, disconnect the VPN and retry.
 
 ### Sync knowledge to R2
 
@@ -168,7 +170,7 @@ cd scripts && uv run python ad_set_builder.py \
 ### Local dev
 
 ```bash
-cd worker && npx wrangler dev    # http://localhost:8787
+cd worker && pnpm run dev    # http://localhost:8787
 ```
 
 ### R2 bucket layout
@@ -188,6 +190,6 @@ ad-review/
 
 ### Troubleshooting
 
-- **wrangler fetch failed / ETIMEDOUT:** disconnect NordVPN. Node.js TCP to Cloudflare times out through the VPN even though curl works.
+- **wrangler fetch failed / ETIMEDOUT:** disconnect your VPN. Node.js TCP to Cloudflare can time out through a VPN even when curl works.
 - **sync-knowledge.py R2 error:** check `.env` has `CF_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
 - **"No batches found" in review UI:** generate ads with `--upload-r2`, or the batch hasn't been pushed to R2 yet.

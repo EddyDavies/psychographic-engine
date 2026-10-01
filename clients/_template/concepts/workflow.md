@@ -27,6 +27,8 @@ Each **sub-avatar x concept** combination = a ready-made brief.
 
 The same angle can be delivered through multiple concepts. The same concept can carry different angles. Testing both independently reveals what's working.
 
+In test plans and the creative tracker, a bare "concept" means the batch concept (one ad set), and delivery treatments are called messaging concepts and visual concepts. See `angles-and-testing.md`.
+
 ## Example
 
 Given:

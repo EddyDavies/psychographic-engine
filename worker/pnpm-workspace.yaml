@@ -1,0 +1,7 @@
+minimumReleaseAge: 20160        # 2 weeks: skip zero-day malicious versions
+blockExoticSubdeps: true        # block transitive git/tarball deps
+strictDepBuilds: true           # fail install on un-allowed lifecycle scripts
+trustPolicy: no-downgrade       # refuse weaker-trust republishes
+allowBuilds:
+  esbuild: true
+  workerd: true

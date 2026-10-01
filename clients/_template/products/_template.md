@@ -9,6 +9,8 @@
 ## How It Works
 [Plain-language explanation of what this product does and how the customer uses it. 2-3 sentences.]
 
+**6th grade version:** [X does Y, which causes Z. Ads borrow from this line. See `../concepts/offer-understanding.md`.]
+
 ## Features
 - [Objective feature 1 — what it IS, not what it does for the customer]
 - [Objective feature 2]
@@ -37,6 +39,7 @@
 
 ## Hidden Mechanisms
 > Things the customer doesn't know but would find compelling if revealed.
+> Ask: What does it do that we don't advertise? What does it include that alternatives don't? If it worked too well, what would people complain about? If someone explained it to a friend, what would they say?
 - [Hidden mechanism 1]
 - [Hidden mechanism 2]
 

@@ -6,13 +6,15 @@ Copy and fill in the placeholders below for each new test batch.
 ## Test Plan: [Batch ID]
 
 **Date:** YYYY-MM-DD
-**Test Method:** Iterative / Concept / A/B Split
+**Test Method:** Discovery Batch / Deep Iteration / A/B Split (see methods.md; tracker values `discovery` / `deep-iteration` / `ab-split`)
 **Budget:** $X per variant
 **Duration:** X days
 
 ### What We're Testing
 
-**Concept:** [Framework] + [Angle]
+**Concept:** [c01: the big idea of this ad set. One concept is one ad set; a format change is its own concept]
+**Offer:** [offer slug from products/ or offers/]
+**Framework:** [Framework] + [Angle]
 **Hypothesis:** [What we expect to learn]
 
 ### Angles
@@ -33,6 +35,7 @@ Copy and fill in the placeholders below for each new test batch.
 - **Format:** [Static / Video / UGC — from concepts/formats/]
 - **Awareness Level:** [Unaware → Most Aware]
 - **Platform:** Meta (Facebook + Instagram)
+- **Ad set shape (3:2:2):** 3 creatives, 2 primary texts, 2 headlines
 
 ### Success Criteria
 - Primary metric: [CTR / CPA / ROAS]

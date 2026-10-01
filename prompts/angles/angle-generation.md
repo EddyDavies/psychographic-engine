@@ -2,7 +2,7 @@
 
 ## When to Use
 
-After sub-avatars are built. Takes sub-avatar profiles and product knowledge and generates angles per sub-avatar — each a clear, actionable reason to buy — ready to paste into `angles.md`.
+After sub-avatars are built. Takes sub-avatar profiles and product knowledge and generates angles per sub-avatar, each a clear, actionable reason to buy, ready to write into angle files (see Output Destination).
 
 Hooks are NOT generated here. Hooks come later when the angle is paired with a messaging concept.
 
@@ -20,8 +20,8 @@ Based on the Evolve Enhanced angle identification framework.
 ## Inputs Required
 
 - Sub-avatar file(s) from `clients/{client}/avatars/`
-- Product knowledge from `clients/{client}/products/`
-- (Optional) Existing `angles.md` to avoid duplicating angles already captured
+- Product knowledge from `clients/{client}/products/`, and the offer being sold (`products/{slug}.md` or `offers/{slug}.md`)
+- (Optional) The sub-avatar's existing angle files, `ranked-angles.md`, and the archived `angles/angles.md`, to avoid duplicating angles already captured
 
 ## Prompt Template
 
@@ -35,7 +35,7 @@ You are a direct response marketing strategist specialising in customer avatar a
 [PASTE SUB-AVATAR FILE CONTENTS — one or more]
 
 **Existing Angles (if any):**
-[PASTE CURRENT angles.md CONTENTS, OR "None yet"]
+[PASTE EXISTING ANGLE FILES / ranked-angles.md CONTENTS, OR "None yet"]
 
 ### What Makes A Good Angle
 
@@ -64,6 +64,7 @@ If the answer is "no" to any question, flag the sub-avatar as weak or overlappin
 3. For each angle, examine the sub-avatar's most painful or specific attributes — their Implied Beliefs, Hooks That Resonate, Objections, Experiences, and Emotions — and convert these into a reason to buy.
 4. For each angle, explain the emotional lever — which specific sub-avatar attribute (belief, emotion, experience, objection) makes this angle land.
 5. If existing angles are provided, do not generate angles with the same Reason to Buy. Find gaps.
+6. Each angle sells one offer. Proof Points may only use claims present in the product or offer file. Objections to Pre-empt come from the sub-avatar's Objections section.
 
 ### Output Format
 
@@ -75,7 +76,15 @@ Output each angle in EXACTLY this format, grouped by sub-avatar, with `---` sepa
 
 **Reason to Buy:** [Single compelling reason this angle gives someone to purchase]
 
+**Offer:** [offer slug: the products/ or offers/ file this angle sells]
+
 **Emotional Lever:** [Which specific sub-avatar attribute — implied belief, emotion, experience, or objection — makes this angle land]
+
+**Proof Points:**
+- [Claim from the product or offer file] ([where it comes from])
+
+**Objections to Pre-empt:**
+- "[Objection from the sub-avatar profile]": [how the ad handles it]
 
 **Target Sub-Avatars:**
 - [sub-avatar-name] -- [why this angle resonates with them]
@@ -104,4 +113,4 @@ Output each angle in EXACTLY this format, grouped by sub-avatar, with `---` sepa
 
 ## Output Destination
 
-Append to `clients/{client}/angles/angles.md`
+Each angle becomes its own file at `clients/{client}/avatars/core-{name}/sub-{name}/angle-{slug}.md` (from the angle template, with frontmatter), listed under its offer in `ranked-angles.md`. `prompts/angles/generate-angles.md` is the agent workflow that does this end to end. `clients/{client}/angles/angles.md` is the archive of pre-Evolve angles; read it for gaps, but do not append to it.

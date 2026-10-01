@@ -2,9 +2,9 @@
 
 Markdown knowledge base for creative strategy. AI agents browse this for brand context when writing copy, building briefs, or planning tests.
 
-## Branch Model
+## Template Model
 
-Client data lives on `client/{name}` branches, never on `main`. `main` carries only shared prompts, scripts, and the `clients/_template/` scaffold. Check out the client's branch before doing any client work; see the README for onboarding a new client.
+This is a public template: it carries shared prompts, scripts, frameworks, and the `clients/_template/` scaffold, but no client data. Client work happens in a private copy, with one `clients/{name}/` directory per client; see the README for onboarding a new client. Never add real client data to this repo.
 
 ## Where to Start
 
@@ -21,6 +21,8 @@ Always follow `prompts/README.md`. The required order is:
 
 Sub-Avatar -> Angle Generation -> Angle Brief -> Pick Concepts -> Ad Assembly
 
+After testing: `prompts/testing/process-learnings.md`
+
 Hooks are not pre-written. They emerge when the selected angle collides with a messaging concept during ad assembly.
 
 Before assembling ads, check `clients/{client}/testing/creative-tracker.csv` to avoid duplicating combinations. After assembling, append new rows to the CSV.
@@ -28,7 +30,9 @@ Before assembling ads, check `clients/{client}/testing/creative-tracker.csv` to 
 ## Key Conventions
 
 - **One avatar, one desire, one message per ad** (Rule of One)
-- Angle status: `untested` → `testing` → `winner` / `loser`
+- Angle status (`untested` → `testing` → `winner` / `loser`) lives in each angle file's frontmatter
+- One concept is one ad set (3:2:2); a format change is its own concept
+- Profiles and angles carry YAML frontmatter; run `uv run python scripts/check-knowledge.py` after editing avatars or the tracker
 - Batch naming: `test-{batch}-{YYYY-MM-DD}`
 - Core avatars: `core-{descriptive-name}`, sub-avatars: `sub-{descriptive-name}`
 - kebab-case directories, lowercase filenames
@@ -37,7 +41,8 @@ Before assembling ads, check `clients/{client}/testing/creative-tracker.csv` to 
 
 - `prompts/` — Reusable AI prompt templates
   - `research/` — Research workflow prompts
-  - `testing/` — Test planning prompts
+  - `angles/` — Angle generation (`generate-angles.md`, `angle-generation.md`, `angle-brief.md`)
+  - `testing/` — Test planning prompts and `process-learnings.md`
   - `creative/` — Creative format templates for AI image generation
 - `clients/_template/` — Copy this to onboard a new client
 - `clients/{name}/` — Per-client brand knowledge
@@ -57,14 +62,14 @@ Before assembling ads, check `clients/{client}/testing/creative-tracker.csv` to 
     - `research/` — Review mining and research artifacts
   - `strategy/` — Shared strategic concepts (desires, forces, instincts, awareness)
   - `angles/` — Archive of pre-Evolve angles; new angles live under avatars
-  - `concepts/` — Marketing frameworks and ad format references
+  - `concepts/` — Method docs (angles-and-testing, execution, copywriting, offer-understanding, belief-framework, marketing-frameworks, desire-forces, workflow) plus `formats/`
   - `testing/` — Winners, losers, and strategic learnings
-    - `creative-tracker.csv` — Row-per-ad log of every combination tried (sub-avatar x angle x messaging x visual x product)
+    - `creative-tracker.csv` — Row-per-ad log, 18 columns (batch, concept, testing method, sub-avatar, angle, product, offer, variation, messaging, visual, format, channel, asset ref, status, result, notes)
     - `creative-tracker.md` — Coverage summary and usage guide
 
 ## Review Mining with Playwright
 
-- Client-specific scrapers live on that client's branch (e.g. `scripts/scrape-reviews.py` on `client/acme`); follow `prompts/research/review-mining.md` for the workflow
+- Client-specific scrapers live in your private copy alongside that client's data (e.g. `scripts/scrape-reviews.py`); follow `prompts/research/review-mining.md` for the workflow
 - Analysis output goes to `clients/{client}/avatars/research/review-mining-{YYYY-MM-DD}.md`
 - Also check Trustpilot (`uk.trustpilot.com/review/{client-domain}`) for external reviews
 

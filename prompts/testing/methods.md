@@ -82,6 +82,8 @@ When analysing test results, go beyond structural observations. Identify:
 
 Update angle status in `ranked-angles.md` (`untested` → `testing` → `winner` / `loser`) and capture psychographic insights in `testing/learnings.md`.
 
+The full checklist, including the strategy or execution diagnostic you run before retiring an angle, is `process-learnings.md`.
+
 ---
 
 ## A Note on Bulk Content Seeding

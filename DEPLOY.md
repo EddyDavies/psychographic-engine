@@ -5,27 +5,27 @@ The review page is served by a Cloudflare Worker backed by R2 storage.
 ## First-time setup
 
 ```bash
-cd worker && npm install
+cd worker && pnpm install   # hardened config in worker/pnpm-workspace.yaml
 
 # Create R2 buckets
-wrangler r2 bucket create ad-review
-wrangler r2 bucket create ad-review-dev
+pnpm exec wrangler r2 bucket create ad-review
+pnpm exec wrangler r2 bucket create ad-review-dev
 
 # Set OAuth secrets (used for Google Drive export)
-wrangler secret put GOOGLE_CLIENT_ID
-wrangler secret put GOOGLE_CLIENT_SECRET
+pnpm exec wrangler secret put GOOGLE_CLIENT_ID
+pnpm exec wrangler secret put GOOGLE_CLIENT_SECRET
 ```
 
 ## Deploy
 
 ```bash
-cd worker && npx wrangler deploy
+cd worker && pnpm run deploy
 ```
 
 ## Local dev
 
 ```bash
-cd worker && npx wrangler dev
+cd worker && pnpm run dev
 ```
 
 ## Upload ads

@@ -12,3 +12,4 @@ clients/*/ads/*
 .ralph-logs/
 worker/node_modules/
 worker/.wrangler/
+.venv/

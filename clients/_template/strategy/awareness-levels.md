@@ -13,3 +13,8 @@
 ## Market Sophistication
 
 [Assess which stage the market is at for this product category]
+
+- **Stage:** [1 to 5, with the evidence: who else sells this, and the claims they already make]
+- **Chosen response:** [New mechanism / New information / New identity, and why]
+
+> Method: `../concepts/marketing-frameworks.md`. Angles must rest on the chosen response, not on bigger claims.

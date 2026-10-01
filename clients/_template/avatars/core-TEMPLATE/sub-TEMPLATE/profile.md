@@ -1,12 +1,25 @@
+---
+type: sub-profile
+id: sub-{descriptive-name}
+parent: core-{descriptive-name}
+confidence: low  # low | medium | high; raise one step only when new research adds at least two verbatim quotes
+sources:
+  - ../../research/{file}.md
+updated: YYYY-MM-DD
+---
+
 # Sub-Avatar: sub-{descriptive-name}
 
 ## Parent Core Avatar
-[core-{name}](../core-{name}.md)
+[core-{name}](../profile.md)
 
 ## Niche Gap
 - **Situation:** [One sentence -- who is this person and what are they doing when they buy?]
 - **Unique Objection:** [The #1 objection only this sub-avatar has]
 - **Different Value Prop:** [How the product's value changes in this situation]
+- **Three Questions:** different ad: [yes/no]; unique objection: [yes/no]; situation alone: [yes/no]
+
+> The niche gap test (see `../../README.md`). All three must be yes. A "no" means the gap is weak: name the sub-avatar it overlaps and merge rather than keep it.
 
 ## Layered Categories
 > Minimum 2 Core 5 categories combined

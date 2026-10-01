@@ -1,3 +1,14 @@
+---
+type: core-profile
+id: core-{descriptive-name}
+anchor_category: desire  # desire | experience | emotion | behaviour | demographic
+mass_instinct: Comfort  # Health | Sex | Status | Belonging | Control | Comfort
+confidence: low  # low | medium | high; raise one step only when new research adds at least two verbatim quotes
+sources:
+  - ../research/{file}.md
+updated: YYYY-MM-DD
+---
+
 # Core Avatar: core-{descriptive-name}
 
 ## Anchor Category
@@ -56,5 +67,5 @@
 > - **Most Aware:** Knows your product well, needs a push to buy
 
 ## Sub-Avatars
-- [sub-{name}](sub-{name}.md)
-- [sub-{name}](sub-{name}.md)
+- [sub-{name}](sub-{name}/profile.md): [one-line situation]
+- [sub-{name}](sub-{name}/profile.md): [one-line situation]
