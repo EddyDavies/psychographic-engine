@@ -34,11 +34,11 @@ updated: YYYY-MM-DD
 
 ### Emotions
 **Primary Emotions:**
-- [Emotion] -- triggered by [what triggers it]
+- [Emotion]: triggered by [what triggers it]
 
 **Secondary Emotions:**
-- [Emotion] -- because [underlying reason]
-- [Emotion] -- because [underlying reason]
+- [Emotion]: because [underlying reason]
+- [Emotion]: because [underlying reason]
 
 ### Behaviors
 - [Action pattern driven by the above]
@@ -53,9 +53,9 @@ updated: YYYY-MM-DD
 
 ## Voice of Customer
 > 3-5 verbatim quotes from reviews, forums, or interviews
-- "[Exact quote]" -- source
-- "[Exact quote]" -- source
-- "[Exact quote]" -- source
+- "[Exact quote]": source
+- "[Exact quote]": source
+- "[Exact quote]": source
 
 ## Awareness Level
 [Unaware / Problem Aware / Solution Aware / Product Aware / Most Aware]

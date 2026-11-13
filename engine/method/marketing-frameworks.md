@@ -49,7 +49,7 @@ Lifestyle movement, tribal belonging. Redefine what buying says about the custom
 
 ### Four Rules
 
-1. **Sophistication is not awareness.** Awareness is one person's knowledge of the problem and product (`../strategy/awareness-levels.md`); sophistication is what the whole market has already heard.
+1. **Sophistication is not awareness.** Awareness is one person's knowledge of the problem and product (`{brand}/strategy/awareness-levels.md`); sophistication is what the whole market has already heard.
 2. **You do not test sophistication.** It just exists. Research tells you the stage; ads respond to it.
 3. **The avatar and sophistication gap.** A perfectly defined avatar, a clear desire, and a product that delivers can still fail if the message does not break through the market's sophistication (see below).
 4. **Markets sophisticate faster than ever.** Feedback and word of mouth now scale as fast as selling does.
@@ -61,7 +61,7 @@ Lifestyle movement, tribal belonging. Redefine what buying says about the custom
 3. List everyone solving the same problem another way.
 4. Collect their claims and ads side by side and look for the angle the market has not seen. Research is how you experience the sophistication from the customer's seat.
 
-Record the stage and the chosen response in `../strategy/awareness-levels.md`.
+Record the stage and the chosen response in `{brand}/strategy/awareness-levels.md`.
 
 ### The Five Stages
 

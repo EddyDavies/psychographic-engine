@@ -5,14 +5,14 @@ Given an offer or product URL, downloads all product images from the page,
 then follows links to component product pages and downloads their images too.
 
 Usage:
-    uv run --with playwright --with httpx python3 scripts/scrape-images.py <url> --client {client-name}
+    uv run --with playwright --with httpx python3 engine/scripts/scrape-images.py <url> --brand {brand}
 
 Examples:
     # Scrape an offer page + its linked products
-    uv run --with playwright --with httpx python3 scripts/scrape-images.py https://example.com/products/starter-bundle
+    uv run --with playwright --with httpx python3 engine/scripts/scrape-images.py https://example.com/products/starter-bundle --brand acme
 
     # Scrape a single product page
-    uv run --with playwright --with httpx python3 scripts/scrape-images.py https://example.com/products/single-product/
+    uv run --with playwright --with httpx python3 engine/scripts/scrape-images.py https://example.com/products/single-product/ --brand acme
 """
 import argparse
 import re
@@ -23,7 +23,8 @@ from urllib.parse import urljoin, urlparse
 import httpx
 from playwright.sync_api import sync_playwright
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+from brands import brand_dir
+
 
 # Skip images matching these patterns (logos, icons, payment badges, etc.)
 SKIP_PATTERNS = [
@@ -283,11 +284,11 @@ def scrape_and_save(page, url: str, output_dir: Path, prefix: str, http_client: 
 def main():
     parser = argparse.ArgumentParser(description="Scrape product/offer images from a webpage")
     parser.add_argument("url", help="URL of the offer or product page to scrape")
-    parser.add_argument("--client", required=True, help="Client name")
+    parser.add_argument("--brand", "--client", dest="brand", required=True, help="Brand folder name")
     parser.add_argument("--no-follow", action="store_true", help="Don't follow links to product pages")
     args = parser.parse_args()
 
-    client_dir = PROJECT_ROOT / "clients" / args.client
+    client_dir = brand_dir(args.brand)
     products_images_dir = client_dir / "products" / "images"
     offers_images_dir = client_dir / "offers" / "images"
 
@@ -300,7 +301,7 @@ def main():
     is_offer = any(kw in page_slug for kw in offer_keywords)
 
     print(f"Page type: {'offer' if is_offer else 'product'}", file=sys.stderr)
-    print(f"Client: {args.client}", file=sys.stderr)
+    print(f"Brand: {args.brand}", file=sys.stderr)
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)

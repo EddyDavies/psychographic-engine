@@ -19,8 +19,8 @@ Based on the Evolve Enhanced angle identification framework.
 
 ## Inputs Required
 
-- Sub-avatar file(s) from `clients/{client}/avatars/`
-- Product knowledge from `clients/{client}/products/`, and the offer being sold (`products/{slug}.md` or `offers/{slug}.md`)
+- Sub-avatar file(s) from `{brand}/avatars/`
+- Product knowledge from `{brand}/products/`, and the offer being sold (`products/{slug}.md` or `offers/{slug}.md`)
 - (Optional) The sub-avatar's existing angle files, `ranked-angles.md`, and the archived `angles/angles.md`, to avoid duplicating angles already captured
 
 ## Prompt Template
@@ -113,4 +113,4 @@ Output each angle in EXACTLY this format, grouped by sub-avatar, with `---` sepa
 
 ## Output Destination
 
-Each angle becomes its own file at `clients/{client}/avatars/core-{name}/sub-{name}/angle-{slug}.md` (from the angle template, with frontmatter), listed under its offer in `ranked-angles.md`. `prompts/angles/generate-angles.md` is the agent workflow that does this end to end. `clients/{client}/angles/angles.md` is the archive of pre-Evolve angles; read it for gaps, but do not append to it.
+Each angle becomes its own file at `{brand}/avatars/core-{name}/sub-{name}/angle-{slug}.md` (from the angle template, with frontmatter), listed under its offer in `ranked-angles.md`. `engine/prompts/angles/generate-angles.md` is the agent workflow that does this end to end. `{brand}/angles/angles.md` is the archive of pre-Evolve angles; read it for gaps, but do not append to it.

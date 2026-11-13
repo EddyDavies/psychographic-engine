@@ -3,12 +3,12 @@
 Interactive ad review server with live SSE updates and inline regeneration.
 
 Usage:
-  uv run --with fastapi --with uvicorn --with httpx --with google-api-python-client --with google-auth-oauthlib --with google-auth-httplib2 python scripts/review-server.py <statics-folder> --client {client-name} [--port 8787]
+  uv run --with fastapi --with uvicorn --with httpx python engine/scripts/review-server.py <statics-folder> --brand {brand} [--port 8787]
 
 The server watches batch folder(s) for new/changed files and pushes updates
 to the browser via Server-Sent Events. Rejection triggers inline regeneration.
-When a full ad set (3 ads) is approved, it packages into statics_ad_sets/,
-uploads to Google Drive, and appends to the local CSV.
+When a full ad set (3 ads) is approved, it packages into ad_sets_YYYY-MM-DD/
+and appends to the local CSV.
 """
 
 import argparse
@@ -24,12 +24,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
-from ad_set_builder import (
-    ensure_image_pair,
-    organize_sets,
-    upload_csv_to_drive,
-    upload_sets_to_drive,
-)
+from ad_sets import ensure_image_pair, organize_sets
+from brands import brand_dir
 from utils import (
     PROJECT_ROOT,
     SUPPORTED_EXTENSIONS,
@@ -402,7 +398,7 @@ def regenerate_copy(ad_name: str, notes: str, entry: dict, batch_dir: Path) -> b
 
 
 # ---------------------------------------------------------------------------
-# Drive upload
+# Set packaging
 # ---------------------------------------------------------------------------
 
 def _next_set_number(output_dir: Path) -> int:
@@ -416,7 +412,7 @@ def _next_set_number(output_dir: Path) -> int:
     return len(existing) + 1
 
 
-def _append_csv_row(output_dir: Path, record: dict, drive_link: str) -> None:
+def _append_csv_row(output_dir: Path, record: dict, content_link: str) -> None:
     """Append a single row to upload_spreadsheet.csv, creating it if needed."""
     import csv
 
@@ -437,7 +433,7 @@ def _append_csv_row(output_dir: Path, record: dict, drive_link: str) -> None:
         "Month": today.strftime("%b %y"),
         "Persona": record["persona"],
         "Ad Amount": len(record["source_images"]),
-        "Creative Strategist": "Ryane",
+        "Creative Strategist": "",
         "What Are You Testing": record["set_theme"],
         "Ad focus": "RSSP",
         "File type": "static",
@@ -446,7 +442,7 @@ def _append_csv_row(output_dir: Path, record: dict, drive_link: str) -> None:
         "Headline 1": variant_a.get("headline", ""),
         "Headline 2": variant_b.get("headline", ""),
         "CTA": "Learn More",
-        "Content Link": drive_link,
+        "Content Link": content_link,
         "Review Status": record["review_status"],
     }
 
@@ -458,13 +454,13 @@ def _append_csv_row(output_dir: Path, record: dict, drive_link: str) -> None:
         writer.writerow(row)
 
 
-def upload_approved_set(set_key: str, ad_names: list[str]) -> str | None:
-    """Package an approved set into ad_sets_YYYY-MM-DD/, upload to Drive, append CSV."""
+def package_approved_set(set_key: str, ad_names: list[str]) -> str | None:
+    """Package an approved set into ad_sets_YYYY-MM-DD/ and append CSV. Returns the set folder."""
     date_suffix = datetime.now().strftime("%Y-%m-%d")
     output_dir = statics_dir.parent / f"ad_sets_{date_suffix}"
     set_number = _next_set_number(output_dir)
 
-    # Build the group dict that ad_set_builder expects
+    # Build the group dict that organize_sets expects
     sorted_names = sorted(ad_names)
     first_batch_dir, first_entry = manifest_index[sorted_names[0]]
 
@@ -499,26 +495,14 @@ def upload_approved_set(set_key: str, ad_names: list[str]) -> str | None:
         print("  organize_sets produced no records", flush=True)
         return None
 
-    # Upload to Drive
-    drive_links: list[str] = []
+    set_path = str(Path(records[0]["set_dir"]).relative_to(PROJECT_ROOT))
+
     try:
-        drive_links, _parent_link = upload_sets_to_drive(output_dir, records)
+        _append_csv_row(output_dir, records[0], set_path)
     except Exception as exc:
-        print(f"  Drive upload failed: {exc}", flush=True)
-        return None
+        print(f"  CSV append failed: {exc}", flush=True)
 
-    link = drive_links[0] if drive_links else None
-
-    # Append CSV row and upload to Drive
-    try:
-        _append_csv_row(output_dir, records[0], link or "")
-        csv_path = output_dir / "upload_spreadsheet.csv"
-        if csv_path.exists() and _parent_link:
-            upload_csv_to_drive(csv_path, _parent_link)
-    except Exception as exc:
-        print(f"  CSV append/upload failed: {exc}", flush=True)
-
-    return link
+    return set_path
 
 
 # ---------------------------------------------------------------------------
@@ -639,19 +623,19 @@ def create_app() -> "FastAPI":
         )
         if all_approved and len(set_ads) >= ADS_PER_SET:
             await push_event(
-                {"type": "set:uploading", "set_key": set_key}
+                {"type": "set:packaging", "set_key": set_key}
             )
             loop = asyncio.get_event_loop()
-            link = await loop.run_in_executor(
-                executor, upload_approved_set, set_key, set_ads
+            set_path = await loop.run_in_executor(
+                executor, package_approved_set, set_key, set_ads
             )
-            if link:
+            if set_path:
                 await push_event(
-                    {"type": "set:uploaded", "set_key": set_key, "drive_link": link}
+                    {"type": "set:packaged", "set_key": set_key, "set_path": set_path}
                 )
             else:
                 await push_event(
-                    {"type": "set:upload_failed", "set_key": set_key}
+                    {"type": "set:package_failed", "set_key": set_key}
                 )
 
         return {"status": "approved", "set_complete": all_approved}
@@ -922,15 +906,14 @@ body {
     padding: 0.3rem 0.7rem;
     border-radius: 999px;
 }
-.set-status-badge.uploading { background: #382515; color: #ffbe74; }
-.set-status-badge.uploaded { background: #14301f; color: #7ce5a4; }
-.drive-link {
+.set-status-badge.packaging { background: #382515; color: #ffbe74; }
+.set-status-badge.approved { background: #14301f; color: #7ce5a4; }
+.set-path {
     color: #7ce5a4;
     text-decoration: none;
     font-size: 0.8rem;
     font-weight: 600;
 }
-.drive-link:hover { text-decoration: underline; }
 
 /* Cards */
 .card {
@@ -1251,8 +1234,8 @@ body {
 // ---- State ----
 let adsData = {};       // ad_name -> ad object
 let setsData = {};      // set_key -> [ad objects]
-let setDriveLinks = {}; // set_key -> drive link
-let setUploading = {};  // set_key -> bool
+let setPackaged = {};   // set_key -> packaged set folder
+let setPackaging = {};  // set_key -> bool
 
 // ---- SSE ----
 function connectSSE() {
@@ -1357,23 +1340,23 @@ function handleEvent(event) {
         toast(`Regenerated: ${event.ad_name}`, 'success');
         return;
     }
-    if (t === 'set:uploading') {
-        setUploading[event.set_key] = true;
+    if (t === 'set:packaging') {
+        setPackaging[event.set_key] = true;
         renderSetHeader(event.set_key);
-        toast(`Uploading set to Drive...`, 'info');
+        toast(`Packaging set...`, 'info');
         return;
     }
-    if (t === 'set:uploaded') {
-        delete setUploading[event.set_key];
-        setDriveLinks[event.set_key] = event.drive_link;
+    if (t === 'set:packaged') {
+        delete setPackaging[event.set_key];
+        setPackaged[event.set_key] = event.set_path;
         renderAll();
-        toast(`Set uploaded to Drive!`, 'success');
+        toast(`Set packaged: ${event.set_path}`, 'success');
         return;
     }
-    if (t === 'set:upload_failed') {
-        delete setUploading[event.set_key];
+    if (t === 'set:package_failed') {
+        delete setPackaging[event.set_key];
         renderSetHeader(event.set_key);
-        toast(`Drive upload failed`, 'error');
+        toast(`Set packaging failed`, 'error');
         return;
     }
 }
@@ -1403,11 +1386,11 @@ function renderAll() {
     const showDeployed = document.getElementById('show-deployed')?.checked;
     const showApproved = document.getElementById('show-approved')?.checked;
     for (const setKey of setKeys) {
-        if (!showDeployed && setDriveLinks[setKey]) continue;
+        if (!showDeployed && setPackaged[setKey]) continue;
         const ads = setsData[setKey];
         const first = ads[0] || {};
         const setApproved = ads.every(a => (adsData[a.ad_name] || a).review_status === 'approved');
-        if (!showApproved && setApproved && !setDriveLinks[setKey]) continue;
+        if (!showApproved && setApproved && !setPackaged[setKey]) continue;
 
         html += `<div class="set-group" data-set-key="${esc(setKey)}">`;
         html += `<div class="set-header" id="set-header-${esc(setKey)}">`;
@@ -1431,16 +1414,16 @@ function renderAll() {
 }
 
 function renderSetStatus(setKey) {
-    if (setDriveLinks[setKey]) {
-        return `<a class="drive-link" href="${esc(setDriveLinks[setKey])}" target="_blank">View on Drive</a>`;
+    if (setPackaged[setKey]) {
+        return `<span class="set-path">${esc(setPackaged[setKey])}</span>`;
     }
-    if (setUploading[setKey]) {
-        return `<span class="set-status-badge uploading">Uploading...</span>`;
+    if (setPackaging[setKey]) {
+        return `<span class="set-status-badge packaging">Packaging...</span>`;
     }
     const ads = setsData[setKey] || [];
     const approvedCount = ads.filter(a => (adsData[a.ad_name] || a).review_status === 'approved').length;
     if (approvedCount === ads.length && ads.length > 0) {
-        return `<span class="set-status-badge uploaded">All approved</span>`;
+        return `<span class="set-status-badge approved">All approved</span>`;
     }
     return `<span class="set-meta">${approvedCount}/${ads.length} approved</span>`;
 }
@@ -1448,7 +1431,7 @@ function renderSetStatus(setKey) {
 function renderSetHeader(setKey) {
     const el = document.getElementById(`set-header-${setKey}`);
     if (!el) return;
-    const statusEl = el.querySelector('.drive-link, .set-status-badge, .set-meta:last-child');
+    const statusEl = el.querySelector('.set-path, .set-status-badge, .set-meta:last-child');
     // Re-render entire set header is simpler
     const ads = setsData[setKey] || [];
     const first = ads[0] ? (adsData[ads[0].ad_name] || ads[0]) : {};
@@ -1590,7 +1573,7 @@ function updateCounts() {
     const rejected = ads.filter(a => a.review_status === 'rejected').length;
     const regen = ads.filter(a => a.review_status === 'regenerating').length;
     const pending = total - approved - rejected - regen;
-    const deployedSets = Object.keys(setDriveLinks).length;
+    const deployedSets = Object.keys(setPackaged).length;
 
     document.getElementById('c-total').textContent = `${total} total`;
     document.getElementById('c-approved').textContent = `${approved} approved`;
@@ -1697,23 +1680,23 @@ connectSSE();
 def main() -> None:
     parser = argparse.ArgumentParser(description="Interactive ad review server")
     parser.add_argument(
-        "statics_folder", help="Path to statics folder (e.g. clients/{client}/ads/statics)"
+        "statics_folder", help="Path to statics folder (e.g. {brand}/ads/statics)"
     )
-    parser.add_argument("--client", required=True, help="Client name")
+    parser.add_argument("--brand", "--client", dest="brand", required=True, help="Brand folder name")
     parser.add_argument("--port", type=int, default=8787, help="Server port (default: 8787)")
     parser.add_argument("--no-browser", action="store_true", help="Don't auto-open browser")
     args = parser.parse_args()
 
     global statics_dir, client_dir
     statics_dir = Path(args.statics_folder).resolve()
-    client_dir = PROJECT_ROOT / "clients" / args.client
+    client_dir = brand_dir(args.brand)
 
     if not statics_dir.is_dir():
         print(f"Error: not a directory: {statics_dir}", file=sys.stderr)
         sys.exit(1)
 
     print(f"Statics folder: {statics_dir}")
-    print(f"Client: {args.client}")
+    print(f"Brand: {args.brand}")
     print(f"Server: http://localhost:{args.port}")
 
     app = create_app()

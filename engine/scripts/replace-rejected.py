@@ -7,7 +7,7 @@ same awareness-bucket pool, and runs the full copy + image pipeline to generate
 replacements. Updates the batch manifest with the new entries.
 
 Usage:
-  python3 scripts/replace-rejected.py <review.json> --statics <statics-folder> --client <client>
+  uv run python engine/scripts/replace-rejected.py <review.json> --statics <statics-folder> --brand <brand>
 """
 
 from __future__ import annotations
@@ -19,6 +19,8 @@ from collections import defaultdict
 from pathlib import Path
 
 import importlib
+
+from brands import brand_dir
 _gen = importlib.import_module("generate-ads")
 
 ADS_PER_SET = _gen.ADS_PER_SET
@@ -154,12 +156,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Replace rejected ads with new visual combos")
     parser.add_argument("review_json", nargs="+", help="Review decisions JSON file(s)")
     parser.add_argument("--statics", required=True, help="Statics folder with test-* batch dirs")
-    parser.add_argument("--client", required=True, help="Client name (e.g. acme)")
+    parser.add_argument("--brand", "--client", dest="brand", required=True, help="Brand folder name (e.g. acme)")
     parser.add_argument("--dry-run", action="store_true", help="Show plan without generating")
     args = parser.parse_args()
 
     statics_dir = Path(args.statics).resolve()
-    client_dir = PROJECT_ROOT / "clients" / args.client
+    client_dir = brand_dir(args.brand)
     avatars_dir = client_dir / "avatars"
     offer_images_dir = client_dir / "offers" / "images"
     has_reference_images = offer_images_dir.exists() and any(offer_images_dir.iterdir())
@@ -186,10 +188,10 @@ def main() -> None:
         all_angles.extend(parse_ranked_angles(rf))
 
     awareness_levels = load_awareness_levels(avatars_dir)
-    visual_library = load_markdown_library(PROJECT_ROOT / "prompts" / "concepts" / "visual")
-    messaging_library = load_markdown_library(PROJECT_ROOT / "prompts" / "concepts" / "messaging")
-    angle_brief_template = (PROJECT_ROOT / "prompts" / "angles" / "angle-brief.md").read_text()
-    ad_assembly_template = (PROJECT_ROOT / "prompts" / "concepts" / "ad-assembly.md").read_text()
+    visual_library = load_markdown_library(PROJECT_ROOT / "engine" / "prompts" / "concepts" / "visual")
+    messaging_library = load_markdown_library(PROJECT_ROOT / "engine" / "prompts" / "concepts" / "messaging")
+    angle_brief_template = (PROJECT_ROOT / "engine" / "prompts" / "angles" / "angle-brief.md").read_text()
+    ad_assembly_template = (PROJECT_ROOT / "engine" / "prompts" / "concepts" / "ad-assembly.md").read_text()
     brand_voice, brand_visual_identity, brand_no_gos = resolve_brand_context(client_dir)
     review_config = load_review_config(client_dir)
     offer_context = resolve_offer_context(review_config)
@@ -368,8 +370,7 @@ def main() -> None:
 
     if succeeded:
         print(f"\nNext steps:")
-        print(f"  1. Rebuild ad sets:  python3 scripts/ad_set_builder.py --folder {statics_dir}")
-        print(f"  2. Rebuild review:   python3 scripts/build-review-html.py <ad-sets-folder>")
+        print(f"  1. Rebuild review:   uv run python engine/scripts/build-review-html.py <ads-folder>")
 
 
 if __name__ == "__main__":

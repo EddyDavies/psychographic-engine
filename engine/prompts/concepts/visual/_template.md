@@ -1,7 +1,7 @@
 # Format: [Name]
 
 > One-line description of the visual concept.
-> Adapted from: [meta-ads template number, if applicable — delete this line for originals]
+> Adapted from: [source ad or template, if applicable; delete this line for originals]
 
 ## Variables
 

@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 
+from brands import brand_dir
 from review_engine import (
     build_copy_rule_context,
     build_render_rule_block,
@@ -38,7 +39,6 @@ from utils import (
     encode_image,
     extract_image_bytes,
     get_env,
-    get_google_services,
     json_dump,
     openrouter_headers,
 )
@@ -102,6 +102,7 @@ class Angle:
     angle_slug: str
     reason_to_buy: str
     angle_path: Path
+    offer: str = ""
 
 
 @dataclass(frozen=True)
@@ -128,6 +129,7 @@ def parse_ranked_angles(ranked_angles_path: Path) -> list[Angle]:
 
     angles: list[Angle] = []
     current_sub: str | None = None
+    current_offer = ""
     current_angle: dict[str, object] | None = None
 
     def flush_current() -> None:
@@ -146,12 +148,19 @@ def parse_ranked_angles(ranked_angles_path: Path) -> list[Angle]:
                     angle_slug=angle_path.stem.removeprefix("angle-"),
                     reason_to_buy=str(current_angle["reason_to_buy"]),
                     angle_path=angle_path,
+                    offer=str(current_angle.get("offer", "")),
                 )
             )
         current_angle = None
 
     for raw_line in text.splitlines():
         line = raw_line.strip()
+
+        offer_match = re.match(r"^# Offer:\s*(\S+)", line)
+        if offer_match:
+            flush_current()
+            current_offer = offer_match.group(1)
+            continue
 
         sub_match = re.match(r"^## (sub-[\w-]+)", line)
         if sub_match:
@@ -166,6 +175,7 @@ def parse_ranked_angles(ranked_angles_path: Path) -> list[Angle]:
                 "sub_avatar": current_sub,
                 "angle_num": int(angle_match.group(1)),
                 "angle_name": angle_match.group(2),
+                "offer": current_offer,
             }
             continue
 
@@ -385,10 +395,10 @@ def generate_ad_copy(
 
         if asset_mode == "digital":
             prompt += (
-                "\nThis client is a digital product/app, not a physical-product bundle.\n"
-                "- Adapt any visual-template instructions about products, packaging, bundles, variants, or reference photos into app screens, devices, coach imagery, and grounded lifestyle scenes.\n"
+                "\nThis brand is a digital product/app, not a physical-product bundle.\n"
+                "- Adapt any visual-template instructions about products, packaging, bundles, variants, or reference photos into app screens, devices, and grounded lifestyle scenes.\n"
                 "- Do not mention or invent reference images, exact packaging replication, product counts, gift sets, free items, bottles, boxes, or packshots.\n"
-                "- If the visual needs a 'hero product', use the client's app shown on a phone or device in a believable real-world setting.\n"
+                "- If the visual needs a 'hero product', use the brand's app shown on a phone or device in a believable real-world setting.\n"
             )
 
         if attempt == 1:
@@ -689,193 +699,9 @@ class SetTracker:
             return list(self._completed_sets)
 
 
-class StreamingUploader:
-    """Packages and uploads completed ad sets to Drive, updates a Google Sheet."""
-
-    SHEET_HEADERS = [
-        "Set",
-        "Date",
-        "Sub-Avatar",
-        "Angle",
-        "Visual A",
-        "Visual B",
-        "Visual C",
-        "Status",
-        "Drive Link",
-    ]
-
-    MIME_TYPES = {
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".webp": "image/webp",
-        ".md": "text/markdown",
-        ".json": "application/json",
-    }
-
-    def __init__(self, drive_service, folder_name: str, output_root: Path):
-        self._drive = drive_service
-        self._output_root = output_root
-        self._lock = threading.Lock()
-        self._batch_folder_id: str | None = None
-        self._tracker_file_id: str | None = None
-        self._tracker_rows: list[list[str]] = []
-        self._folder_name = folder_name
-        self._print_lock = threading.Lock()
-
-    def _ensure_batch_folder(self) -> str:
-        if self._batch_folder_id:
-            return self._batch_folder_id
-
-        folder = self._drive.files().create(
-            body={"name": self._folder_name, "mimeType": "application/vnd.google-apps.folder"},
-            fields="id",
-        ).execute()
-        self._batch_folder_id = folder["id"]
-
-        self._drive.permissions().create(
-            fileId=self._batch_folder_id,
-            body={"type": "anyone", "role": "reader"},
-        ).execute()
-
-        with self._print_lock:
-            print(
-                f"Drive folder: https://drive.google.com/drive/folders/{self._batch_folder_id}",
-                flush=True,
-            )
-        return self._batch_folder_id
-
-    def _upload_tracker_csv(self) -> None:
-        """Write tracker rows to a local CSV then upload/update on Drive."""
-        import csv
-        import io
-        from googleapiclient.http import MediaInMemoryUpload
-
-        buf = io.StringIO()
-        writer = csv.writer(buf)
-        writer.writerow(self.SHEET_HEADERS)
-        writer.writerows(self._tracker_rows)
-        csv_bytes = buf.getvalue().encode("utf-8")
-        media = MediaInMemoryUpload(csv_bytes, mimetype="text/csv", resumable=False)
-
-        batch_id = self._ensure_batch_folder()
-        file_name = f"{self._folder_name}_tracker.csv"
-
-        if self._tracker_file_id:
-            self._drive.files().update(
-                fileId=self._tracker_file_id,
-                media_body=media,
-            ).execute()
-        else:
-            result = self._drive.files().create(
-                body={"name": file_name, "parents": [batch_id]},
-                media_body=media,
-                fields="id",
-            ).execute()
-            self._tracker_file_id = result["id"]
-            with self._print_lock:
-                print(f"Tracker CSV uploaded: {file_name}", flush=True)
-
-    def upload_set(self, set_number: int, ad_set_key: str, entries: list[dict]) -> str | None:
-        from googleapiclient.http import MediaFileUpload
-
-        with self._lock:
-            batch_id = self._ensure_batch_folder()
-
-        set_name = f"set_{set_number:02d}"
-        batch_dir = entries[0].get("_batch_dir")
-        if not batch_dir:
-            return None
-
-        set_folder = self._drive.files().create(
-            body={
-                "name": set_name,
-                "mimeType": "application/vnd.google-apps.folder",
-                "parents": [batch_id],
-            },
-            fields="id",
-        ).execute()
-        set_folder_id = set_folder["id"]
-
-        uploaded = 0
-        for entry in sorted(entries, key=lambda e: e.get("sequence", 0)):
-            copy_file = Path(batch_dir) / str(entry["copy_file"])
-            if copy_file.exists():
-                media = MediaFileUpload(str(copy_file), mimetype="text/markdown", resumable=False)
-                self._drive.files().create(
-                    body={"name": copy_file.name, "parents": [set_folder_id]},
-                    media_body=media,
-                    fields="id",
-                ).execute()
-                uploaded += 1
-
-            image_files = entry.get("image_files", {})
-            for suffix, filename in sorted(image_files.items()):
-                image_path = Path(batch_dir) / filename
-                if not image_path.exists():
-                    continue
-                mime = self.MIME_TYPES.get(image_path.suffix.lower(), "application/octet-stream")
-                media = MediaFileUpload(str(image_path), mimetype=mime, resumable=False)
-                self._drive.files().create(
-                    body={"name": image_path.name, "parents": [set_folder_id]},
-                    media_body=media,
-                    fields="id",
-                ).execute()
-                uploaded += 1
-
-                sidecar = image_path.with_suffix(".json")
-                if sidecar.exists():
-                    media = MediaFileUpload(str(sidecar), mimetype="application/json", resumable=False)
-                    self._drive.files().create(
-                        body={"name": sidecar.name, "parents": [set_folder_id]},
-                        media_body=media,
-                        fields="id",
-                    ).execute()
-                    uploaded += 1
-
-        link = f"https://drive.google.com/drive/folders/{set_folder_id}"
-
-        with self._print_lock:
-            print(f"  Uploaded {set_name}: {uploaded} files -> {link}", flush=True)
-
-        return link
-
-    def update_tracker(
-        self,
-        set_number: int,
-        ad_set_key: str,
-        entries: list[dict],
-        drive_link: str,
-        batch_date: str,
-    ) -> None:
-        parts = ad_set_key.split("--", 1)
-        sub_avatar = parts[0] if parts else ad_set_key
-        angle = parts[1] if len(parts) > 1 else ""
-
-        visuals = [str(e.get("visual_format", "")) for e in sorted(entries, key=lambda e: e.get("sequence", 0))]
-        statuses = [str(e.get("review_status", "")) for e in entries]
-        overall = "passed" if all(s == "passed" for s in statuses) else "needs_review"
-
-        row = [
-            f"set_{set_number:02d}",
-            batch_date,
-            sub_avatar,
-            angle,
-            visuals[0] if len(visuals) > 0 else "",
-            visuals[1] if len(visuals) > 1 else "",
-            visuals[2] if len(visuals) > 2 else "",
-            overall,
-            drive_link,
-        ]
-
-        with self._lock:
-            self._tracker_rows.append(row)
-            self._upload_tracker_csv()
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate static ad batches from ranked angles")
-    parser.add_argument("--client", required=True, help="Client name (e.g. acme)")
+    parser.add_argument("--brand", "--client", dest="brand", required=True, help="Brand folder name (e.g. acme)")
     parser.add_argument("--count", type=int, default=6, help="Number of ads to generate")
     parser.add_argument(
         "--dry-run",
@@ -900,11 +726,6 @@ def main() -> None:
         help="Number of parallel workers for ad generation (default: 1 = sequential)",
     )
     parser.add_argument(
-        "--upload-r2",
-        action="store_true",
-        help="Upload generated batches to R2 after generation",
-    )
-    parser.add_argument(
         "--ads-per-angle",
         type=int,
         default=DEFAULT_ADS_PER_ANGLE,
@@ -914,26 +735,9 @@ def main() -> None:
         "--date",
         help="Override the batch date (YYYY-MM-DD)",
     )
-    parser.add_argument(
-        "--upload",
-        action="store_true",
-        help="Upload completed ad sets to Google Drive as they finish",
-    )
-    parser.add_argument(
-        "--sheet",
-        action="store_true",
-        help="Update a Google Sheet tracker in the Drive folder (implies --upload)",
-    )
-    parser.add_argument(
-        "--drive-folder",
-        help="Custom Drive folder name (default: {client}-ads-{date})",
-    )
     args = parser.parse_args()
 
-    if args.sheet:
-        args.upload = True
-
-    client_dir = PROJECT_ROOT / "clients" / args.client
+    client_dir = brand_dir(args.brand)
     avatars_dir = client_dir / "avatars"
     output_root = client_dir / "ads" / "statics"
     output_root.mkdir(parents=True, exist_ok=True)
@@ -977,10 +781,10 @@ def main() -> None:
         sys.exit(1)
 
     awareness_levels = load_awareness_levels(avatars_dir)
-    visual_library = load_markdown_library(PROJECT_ROOT / "prompts" / "concepts" / "visual")
-    messaging_library = load_markdown_library(PROJECT_ROOT / "prompts" / "concepts" / "messaging")
-    angle_brief_template = (PROJECT_ROOT / "prompts" / "angles" / "angle-brief.md").read_text()
-    ad_assembly_template = (PROJECT_ROOT / "prompts" / "concepts" / "ad-assembly.md").read_text()
+    visual_library = load_markdown_library(PROJECT_ROOT / "engine" / "prompts" / "concepts" / "visual")
+    messaging_library = load_markdown_library(PROJECT_ROOT / "engine" / "prompts" / "concepts" / "messaging")
+    angle_brief_template = (PROJECT_ROOT / "engine" / "prompts" / "angles" / "angle-brief.md").read_text()
+    ad_assembly_template = (PROJECT_ROOT / "engine" / "prompts" / "concepts" / "ad-assembly.md").read_text()
     brand_voice, brand_visual_identity, brand_no_gos = resolve_brand_context(client_dir)
     review_config = load_review_config(client_dir)
     offer_context = resolve_offer_context(review_config)
@@ -1037,38 +841,9 @@ def main() -> None:
     failed_ads: list[tuple[int, str, str]] = []
     failed_lock = threading.Lock()
 
-    # --- Streaming upload setup ---
-    uploader: StreamingUploader | None = None
-    if args.upload and not args.dry_run:
-        drive_service, _ = get_google_services()
-        folder_name = args.drive_folder or f"{args.client}-ads-{batch_date.isoformat()}"
-        uploader = StreamingUploader(
-            drive_service,
-            folder_name,
-            output_root,
-        )
-        uploader._print_lock = print_lock
-
     def on_set_complete(set_number: int, ad_set_key: str, entries: list[dict]) -> None:
         with print_lock:
             print(f"\n  SET COMPLETE: set_{set_number:02d} ({ad_set_key})", flush=True)
-
-        if not uploader:
-            return
-
-        try:
-            link = uploader.upload_set(set_number, ad_set_key, entries)
-            if link and args.sheet:
-                uploader.update_tracker(
-                    set_number,
-                    ad_set_key,
-                    entries,
-                    link,
-                    batch_date.isoformat(),
-                )
-        except Exception as exc:
-            with print_lock:
-                print(f"  Upload failed for set_{set_number:02d}: {exc}", flush=True, file=sys.stderr)
 
     set_tracker = SetTracker(ads_per_set=ADS_PER_SET, on_set_complete=on_set_complete)
 
@@ -1315,17 +1090,11 @@ def main() -> None:
     # --- Summary ---
     completed = sum(len(v) for v in manifests.values())
     print(f"\nCompleted: {completed}/{len(queue)} ads")
-    print(f"Sets uploaded: {len(set_tracker.completed_keys)}")
+    print(f"Sets completed: {len(set_tracker.completed_keys)}")
     if failed_ads:
         print(f"Failed: {len(failed_ads)} ads")
         for idx, key, err in failed_ads:
             print(f"  [{idx}] {key}: {err}")
-
-    if args.upload_r2:
-        from r2 import upload_batch
-        for batch_dir in manifests:
-            count = upload_batch(batch_dir)
-            print(f"Uploaded {count} files to R2")
 
 
 if __name__ == "__main__":

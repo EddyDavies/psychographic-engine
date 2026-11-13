@@ -7,7 +7,7 @@ the source batch entries, and regenerates images for items marked as 'edit'
 with the reviewer's notes appended as additional instructions.
 
 Usage:
-  python3 scripts/regenerate-ads.py <review.json> [<review2.json> ...] <statics-folder> [--workers 4]
+  uv run python engine/scripts/regenerate-ads.py <review.json> [<review2.json> ...] <statics-folder> [--workers 4]
 """
 
 from __future__ import annotations
@@ -256,8 +256,7 @@ def main() -> None:
 
     if succeeded:
         print(f"\nNext steps:")
-        print(f"  1. Rebuild ad sets:  python3 scripts/ad_set_builder.py --folder {statics_dir}")
-        print(f"  2. Rebuild review:   python3 scripts/build-review-html.py <ad-sets-folder>")
+        print(f"  1. Rebuild review:   uv run python engine/scripts/build-review-html.py <ads-folder>")
 
 
 if __name__ == "__main__":

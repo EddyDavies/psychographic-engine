@@ -13,8 +13,8 @@ Run it when:
 
 1. The batch's test plan: success criteria and minimum spend before judging
 2. The results the user provides (ad platform export or report)
-3. `clients/{client}/testing/creative-tracker.csv` and `testing/learnings.md`
-4. `clients/{client}/concepts/execution.md` and `concepts/angles-and-testing.md`
+3. `{brand}/testing/creative-tracker.csv` and `testing/learnings.md`
+4. `engine/method/execution.md` and `engine/method/angles-and-testing.md`
 5. The angle files and `ranked-angles.md` for every angle in the batch
 6. Comments on the winning and losing ads, if the user can share them
 
@@ -35,9 +35,9 @@ Run it when:
    - A winner still improving: Deep Iteration on it.
    - Everything lost, or a Deep Iteration angle plateaued: a new Discovery batch.
    - An execution loss on an avatar you are confident in: a second batch on that angle (Deep Iteration, or a different format), and a third only if the feedback still points at execution. After three losing batches, move to another angle.
-   - A sub-avatar left with fewer than three untested angles on an offer: run `prompts/angles/generate-angles.md`.
+   - A sub-avatar left with fewer than three untested angles on an offer: run `engine/prompts/angles/generate-angles.md`.
 9. **Refresh coverage.** Update the Coverage Summary in `testing/creative-tracker.md`.
-10. **Validate.** Run `uv run python scripts/check-knowledge.py` and fix every error. Commit in your private copy; never add client data to this public template.
+10. **Validate.** Run `uv run python engine/scripts/check-knowledge.py` and fix every error. Commit in your private copy; never add brand data to the public engine repo.
 
 ## Worked Example (Fernwood)
 

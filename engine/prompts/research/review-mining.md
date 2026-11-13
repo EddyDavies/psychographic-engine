@@ -73,4 +73,4 @@ Then provide a summary of the top 10 most powerful insights, ranked by frequency
 
 ## Output Destination
 
-Save to `clients/{client}/avatars/research/review-mining-{YYYY-MM-DD}.md`
+Save to `{brand}/avatars/research/review-mining-{YYYY-MM-DD}.md`

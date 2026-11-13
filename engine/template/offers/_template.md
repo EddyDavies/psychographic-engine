@@ -1,5 +1,7 @@
 # [Offer Name]
 
+> Copy this file to `{offer-slug}.md` for each offer, fill it in, then delete `_template.md` from your brand folder.
+
 ## Basics
 - **Products Included:** [list products with links to their .md files]
 - **Regular Price:** [sum of individual prices]

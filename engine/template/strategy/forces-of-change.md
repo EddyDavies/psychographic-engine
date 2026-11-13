@@ -1,4 +1,4 @@
-# Forces of Change — {Client}
+# Forces of Change: {Brand}
 
 ## Mass Education
 

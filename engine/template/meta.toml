@@ -1,0 +1,76 @@
+# Meta launch config for one brand. Copy to {brand}/meta.toml and fill in.
+# Read by engine/scripts/meta/launch.py. Credentials never go here: set
+# META_ACCESS_TOKEN, META_AD_ACCOUNT_ID, META_PAGE_ID and (optionally)
+# META_INSTAGRAM_ACTOR_ID in the environment or the repo-root .env.
+#
+# Every batch becomes one campaign with the budget on the campaign (CBO).
+# Every concept becomes one ad set with the settings below, identical across
+# ad sets, so the creative concept is the only thing that differs.
+
+[campaign]
+# OUTCOME_TRAFFIC optimises link clicks; OUTCOME_SALES and OUTCOME_LEADS
+# optimise a pixel event and need adset.pixel_id and adset.conversion_event.
+objective = "OUTCOME_SALES"
+# Daily budget in minor units of the ad account currency: 10000 = 100.00.
+# The budget comes from the human, in writing, for this batch. Never pick one.
+daily_budget = 10000
+# Note only, and a guard: a live run stops if the account bills in another currency.
+currency = "GBP"
+bid_strategy = "LOWEST_COST_WITHOUT_CAP"   # highest volume; no cost or bid caps for tests
+# Name template; placeholders {brand} and {batch}.
+name = "{brand} // {batch}"
+# Leave empty for ordinary commerce. Housing, employment, credit or social issue
+# ads must declare their category here.
+special_ad_categories = []
+
+[adset]
+# Optional override; defaults to LINK_CLICKS for traffic, OFFSITE_CONVERSIONS otherwise.
+# optimization_goal = "LANDING_PAGE_VIEWS"
+billing_event = "IMPRESSIONS"
+pixel_id = "123456789012345"
+conversion_event = "PURCHASE"        # PURCHASE, LEAD, COMPLETE_REGISTRATION, ADD_TO_CART ...
+attribution_window_days = 7          # click through; conversion goals only
+
+[targeting]
+countries = ["GB"]
+age_min = 25
+age_max = 65                         # 65 means 65 and over
+# genders = [2]                      # 1 men, 2 women; leave out for all
+location_types = ["home", "recent"]
+# Broad by default: no interests, no retargeting. Add audience IDs only with a reason.
+custom_audiences = []
+excluded_custom_audiences = []       # e.g. past purchasers, once the pixel sees them
+advantage_audience = false           # false keeps age and audiences as hard limits
+
+[placements]
+# "advantage" lets Meta place ads everywhere (recommended). "manual" limits to
+# the lists below; the square and 9x16 image rules are trimmed to match.
+mode = "advantage"
+# publisher_platforms = ["facebook", "instagram"]
+# facebook_positions = ["feed", "story", "facebook_reels"]
+# instagram_positions = ["stream", "story", "reels"]
+
+[creative]
+cta = "SHOP_NOW"                     # SHOP_NOW, LEARN_MORE, SIGN_UP, ORDER_NOW, GET_OFFER ...
+# Optional link description under the headline (feeds only). Leave empty to omit.
+description = ""
+# Appended to every click by Meta. {{ad.id}} is a Meta macro, filled per ad.
+url_tags = "ad_id={{ad.id}}"
+
+[landing]
+url = "https://www.example.com/starter-kit"
+# Query string added to the landing URL. Placeholders: {brand} {batch}
+# {concept} {ad} {sub_avatar} {angle} {offer}. {concept} is the ad set
+# (c01-angle-slug); {ad} is one ad in it (c01-angle-slug_v2).
+utm = "utm_source=meta&utm_medium=paid_social&utm_campaign={batch}&utm_content={ad}"
+
+# Optional landing page per offer, keyed by the angle file's `offer` slug.
+[landing.by_offer]
+# starter-kit = "https://www.example.com/starter-kit"
+# refill-subscription = "https://www.example.com/subscribe"
+
+# EU Digital Services Act: required when any targeted country is in the EU.
+# The beneficiary is who the ads are for; the payor is who pays for them.
+[dsa]
+beneficiary = "Example Brand Ltd"
+payor = "Example Brand Ltd"

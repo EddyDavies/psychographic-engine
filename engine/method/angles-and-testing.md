@@ -10,11 +10,11 @@ The vocabulary every angle file, test plan, and tracker row uses. Based on the E
 | **Angle** | The reason one sub-avatar buys one offer. One sentence a media buyer could repeat back. | "The refill pods clean as hard as the bottle you gave up, so switching costs you nothing." |
 | **Variation** | One execution of an angle: a hook, a headline, a cut. | Hook 2 of that angle on an annotated lifestyle visual |
 | **Format** | How it is delivered: static, video, carousel, email (see `formats/`). | Static |
-| **Testing method** | Discovery Batch, Deep Iteration, or A/B Split (see `prompts/testing/methods.md`). | Discovery Batch |
+| **Testing method** | Discovery Batch, Deep Iteration, or A/B Split (see `engine/prompts/testing/methods.md`). | Discovery Batch |
 
 ### Concept versus messaging and visual concepts
 
-`prompts/concepts/messaging/` and `prompts/concepts/visual/` hold **messaging concepts** and **visual concepts**. They are treatments applied at ad assembly, and they are always named with their qualifier. A bare "concept" in a test plan or in the `concept` column of `testing/creative-tracker.csv` always means the batch concept above.
+`engine/prompts/concepts/messaging/` and `engine/prompts/concepts/visual/` hold **messaging concepts** and **visual concepts**. They are treatments applied at ad assembly, and they are always named with their qualifier. A bare "concept" in a test plan or in the `concept` column of `testing/creative-tracker.csv` always means the batch concept above.
 
 ## One concept is one ad set: the 3:2:2 rule
 
@@ -40,7 +40,7 @@ Do not mix a format test into an angle test in the same ad set. It adds a second
 
 ## Hooks
 
-Hooks communicate the angle. Direct, not indirect. Each hook works as the headline of a static or the first line of a video. Hook rules (length, the Four U's, the three hook sources) are in `copywriting.md`. When hooks are written is set by the pipeline in `prompts/README.md`.
+Hooks communicate the angle. Direct, not indirect. Each hook works as the headline of a static or the first line of a video. Hook rules (length, the Four U's, the three hook sources) are in `copywriting.md`. When hooks are written is set by the pipeline in `engine/prompts/README.md`.
 
 ## Ranked angles
 
@@ -56,6 +56,6 @@ Hooks call out the specific sub-avatar ("POV: you swapped to eco spray and the w
 
 ## Learnings
 
-A learning names the sub-avatar, the angle, and the offer, and says why. "Lifestyle visuals beat studio shots" is a format observation; the learning also records which reason to buy the winning visual carried. Before marking an angle a loser, run the strategy or execution diagnostic in `execution.md`. The full close-the-loop steps are in `prompts/testing/process-learnings.md`.
+A learning names the sub-avatar, the angle, and the offer, and says why. "Lifestyle visuals beat studio shots" is a format observation; the learning also records which reason to buy the winning visual carried. Before marking an angle a loser, run the strategy or execution diagnostic in `execution.md`. The full close-the-loop steps are in `engine/prompts/testing/process-learnings.md`.
 
-Related: `../avatars/README.md` (Core 5 and the niche gap test), `copywriting.md`, `execution.md`, `marketing-frameworks.md`.
+Related: `{brand}/avatars/README.md` (Core 5 and the niche gap test), `copywriting.md`, `execution.md`, `marketing-frameworks.md`.

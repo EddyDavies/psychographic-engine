@@ -1,6 +1,6 @@
 """
 Build an HTML review page from generated ad images + copy files.
-Usage: python3 scripts/build-review-html.py <ads-folder>
+Usage: uv run python engine/scripts/build-review-html.py <ads-folder>
 """
 
 from __future__ import annotations
@@ -1398,7 +1398,7 @@ def build_combined_html(folder_args: list[str]) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python3 scripts/build-review-html.py <ads-folder> [<ads-folder> ...]")
+        print("Usage: uv run python engine/scripts/build-review-html.py <ads-folder> [<ads-folder> ...]")
         sys.exit(1)
     if len(sys.argv) > 2:
         build_combined_html(sys.argv[1:])

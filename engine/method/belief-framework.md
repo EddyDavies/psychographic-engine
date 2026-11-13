@@ -79,7 +79,7 @@ In a Stage 5 market, identification is the main response (see `marketing-framewo
 
 ## Relationship to Core 5
 
-The Core 5 framework (`../avatars/README.md`) breaks a belief found in research into experience, emotion, and behaviour so avatars stay clean. This file is the other half: once the avatar is built, the belief comes back as the filter the ad must pass and the thing the ad builds.
+The Core 5 framework (`{brand}/avatars/README.md`) breaks a belief found in research into experience, emotion, and behaviour so avatars stay clean. This file is the other half: once the avatar is built, the belief comes back as the filter the ad must pass and the thing the ad builds.
 
 ## Map of Consciousness Reference
 

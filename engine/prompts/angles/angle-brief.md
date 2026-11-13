@@ -6,9 +6,9 @@ After selecting an angle from `angles.md` for ad creation. Produces a format-agn
 
 ## Inputs Required
 
-- One angle entry from `clients/{client}/angles/angles.md`
-- The target sub-avatar file(s) it references from `clients/{client}/avatars/`
-- Product knowledge from `clients/{client}/products/`
+- One angle entry from `{brand}/angles/angles.md`
+- The target sub-avatar file(s) it references from `{brand}/avatars/`
+- Product knowledge from `{brand}/products/`
 
 ## Prompt Template
 

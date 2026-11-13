@@ -1,6 +1,6 @@
 # Offer Understanding
 
-Know exactly what the product or offer is and does, so you can identify desires, build avatars, and write ads that match what it actually delivers. Evolve calls this the Product Overview Document. Fill it in `../products/{product}.md` (from `../products/_template.md`) before building avatars or angles for a new product, and in `../offers/{offer}.md` for a bundle.
+Know exactly what the product or offer is and does, so you can identify desires, build avatars, and write ads that match what it actually delivers. Evolve calls this the Product Overview Document. Fill it in `{brand}/products/{product}.md` (from `engine/template/products/_template.md`) before building avatars or angles for a new product, and in `{brand}/offers/{offer}.md` for a bundle.
 
 ## The seven steps
 
@@ -18,9 +18,9 @@ Know exactly what the product or offer is and does, so you can identify desires,
 
 ## Rules
 
-- Benefits and desires are **assumed**. They are hypotheses until research or test results confirm them; mark them so, and check them against the scored desires in `../strategy/desires.md` before relying on one.
+- Benefits and desires are **assumed**. They are hypotheses until research or test results confirm them; mark them so, and check them against the scored desires in `{brand}/strategy/desires.md` before relying on one.
 - The chain runs feature, benefit, desire. A feature with no desire at the end of it does not belong in the ad.
 - The 6th grade version is the one the ads borrow from.
 - An angle's Proof Points may only use claims this file supports.
 
-Related: `desire-forces.md`, `../avatars/README.md`, `marketing-frameworks.md`.
+Related: `desire-forces.md`, `{brand}/avatars/README.md`, `marketing-frameworks.md`.

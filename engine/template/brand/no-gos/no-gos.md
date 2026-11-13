@@ -23,4 +23,4 @@
 
 ### Platform Compliance
 - **Meta Ad Policy:** No misleading claims, no personal attributes ("Are you overweight?"), no before/after implying impossible results, no sensationalist content
-- **Category-Specific:** [Add restrictions for the client's product category]
+- **Category-Specific:** [Add restrictions for the brand's product category]

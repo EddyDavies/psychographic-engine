@@ -59,4 +59,4 @@ Identify what competitors are NOT doing. Look for:
 
 ## Output Destination
 
-Save to `clients/{client}/research/competitor-analysis-{YYYY-MM-DD}.md`
+Save to `{brand}/research/competitor-analysis-{YYYY-MM-DD}.md`

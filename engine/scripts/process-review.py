@@ -3,7 +3,7 @@
 Process human review decisions exported from the review HTML page.
 
 Usage:
-  python3 scripts/process-review.py <review-decisions.json> <ad-sets-folder>
+  uv run python engine/scripts/process-review.py <review-decisions.json> <ad-sets-folder>
 
 Actions:
   --summary         Print a summary of decisions (default if no action specified)

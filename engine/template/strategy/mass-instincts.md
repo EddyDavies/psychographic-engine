@@ -1,8 +1,8 @@
-# Mass Instincts — {Client}
+# Mass Instincts: {Brand}
 
 The 6 permanent forces that drive all purchasing decisions.
 
-| Instinct | Definition | {Client} Expression |
+| Instinct | Definition | {Brand} Expression |
 |----------|-----------|---------------------|
 | **Health** | Desire for physical wellbeing, safety, avoiding harm | [How this shows up] |
 | **Status** | Desire to be respected, admired, envied | [How this shows up] |

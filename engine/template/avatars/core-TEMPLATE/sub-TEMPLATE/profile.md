@@ -4,7 +4,7 @@ id: sub-{descriptive-name}
 parent: core-{descriptive-name}
 confidence: low  # low | medium | high; raise one step only when new research adds at least two verbatim quotes
 sources:
-  - ../../research/{file}.md
+  - ../../research/{file}.md  # sub-profiles sit one level deeper than core profiles, hence ../../
 updated: YYYY-MM-DD
 ---
 
@@ -14,7 +14,7 @@ updated: YYYY-MM-DD
 [core-{name}](../profile.md)
 
 ## Niche Gap
-- **Situation:** [One sentence -- who is this person and what are they doing when they buy?]
+- **Situation:** [One sentence: who is this person and what are they doing when they buy?]
 - **Unique Objection:** [The #1 objection only this sub-avatar has]
 - **Different Value Prop:** [How the product's value changes in this situation]
 - **Three Questions:** different ad: [yes/no]; unique objection: [yes/no]; situation alone: [yes/no]
@@ -38,14 +38,14 @@ updated: YYYY-MM-DD
 - **Behavior:** "...so they [Z]."
 
 ## Hooks That Resonate
-1. "[Hook text]" -- why it works for this sub-avatar
-2. "[Hook text]" -- why it works
-3. "[Hook text]" -- why it works
+1. "[Hook text]": why it works for this sub-avatar
+2. "[Hook text]": why it works
+3. "[Hook text]": why it works
 
 ## Awareness Level
 [May differ from core avatar]
 
 ## Objections
 > Specific to this sub-avatar
-- "[Objection]" -- [underlying concern]
-- "[Objection]" -- [underlying concern]
+- "[Objection]": [underlying concern]
+- "[Objection]": [underlying concern]

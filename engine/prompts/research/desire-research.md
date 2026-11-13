@@ -61,4 +61,4 @@ After the table, provide:
 
 ## Output Destination
 
-Save to `clients/{client}/research/desire-research-{YYYY-MM-DD}.md`
+Save to `{brand}/research/desire-research-{YYYY-MM-DD}.md`

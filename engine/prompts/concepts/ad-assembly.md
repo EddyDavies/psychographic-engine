@@ -9,8 +9,8 @@ Writes the primary text and headline only. On-image text (headlines, callouts, w
 ### Inputs Required
 
 - Angle brief (output of the angle-brief prompt)
-- One messaging concept file from `prompts/concepts/messaging/`
-- Brand voice, visual identity, and no-gos from `clients/{client}/brand/`
+- One messaging concept file from `engine/prompts/concepts/messaging/`
+- Brand voice, visual identity, and no-gos from `{brand}/brand/`
 
 ### Prompt Template
 
@@ -34,7 +34,7 @@ You are a direct response copywriter. Write ad platform copy (primary text + hea
 4. Address at least one objection from the angle brief's Objections to Pre-empt list.
 5. End with a CTA.
 6. Respect all brand no-gos.
-7. Carry the client's visual identity into the image prompt so the image model sees the correct colour, font, and layout constraints.
+7. Carry the brand's visual identity into the image prompt so the image model sees the correct colour, font, and layout constraints.
 
 ### Output Format
 
@@ -68,10 +68,10 @@ After copy is approved, the image model gets the visual concept template + angle
 
 - Approved primary text + headline from Step 1
 - Angle brief
-- One visual concept file from `prompts/concepts/visual/`
-- One messaging concept file from `prompts/concepts/messaging/`
+- One visual concept file from `engine/prompts/concepts/visual/`
+- One messaging concept file from `engine/prompts/concepts/messaging/`
 - Product reference image
-- Brand voice, visual identity, and no-gos from `clients/{client}/brand/`
+- Brand voice, visual identity, and no-gos from `{brand}/brand/`
 
 ### Image Prompt Structure
 
@@ -95,4 +95,4 @@ The image model writes on-image text (headlines, callouts, whiteboard copy) to f
 
 ### Output Destination
 
-Save images to `clients/{client}/ads/statics/`
+Save images to `{brand}/ads/statics/`

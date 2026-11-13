@@ -33,7 +33,7 @@ updated: YYYY-MM-DD
 
 ## Proof Points
 
-> Only claims the product or offer file supports, each with where it comes from. Never fabricate volumes, names, or stories (see `concepts/copywriting.md`).
+> Only claims the product or offer file supports, each with where it comes from. Never fabricate volumes, names, or stories (see `engine/method/copywriting.md`).
 
 - [Claim] ([source: products/{slug}.md, offers/{slug}.md, review quote, test result])
 - [Claim] ([source])
@@ -51,9 +51,9 @@ Formats suited to this angle (pick one per test):
 
 | Format | Why it fits | Inputs |
 |--------|-------------|--------|
-| [annotated-lifestyle](../../../../../prompts/creative/annotated-lifestyle.md) | — | headline: "…", callouts: … |
+| [annotated-lifestyle](../../../../engine/prompts/concepts/visual/annotated-lifestyle.md) | n/a | headline: "…", callouts: … |
 
-> See `prompts/creative/` for all available format templates.
+> See `engine/prompts/concepts/visual/` for all available format templates.
 
 ## Test History
 

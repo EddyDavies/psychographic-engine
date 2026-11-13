@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""Validate client knowledge bases: profile and angle frontmatter, and the creative tracker.
+"""Validate brand knowledge bases: profile and angle frontmatter, and the creative tracker.
 
 Run from the repo root:
-    uv run python scripts/check-knowledge.py              # every clients/*/ directory
-    uv run python scripts/check-knowledge.py --client acme
+    uv run python engine/scripts/check-knowledge.py              # every brand plus engine/template
+    uv run python engine/scripts/check-knowledge.py --brand acme
 
-What it checks, per clients/{client}/:
+What it checks, per {brand}/ and engine/template/:
   avatars/core-*/profile.md               type: core-profile
   avatars/core-*/sub-*/profile.md         type: sub-profile
   avatars/core-*/sub-*/angle-*.md         type: angle
   testing/creative-tracker.csv            18-column header, field count, status and testing-method values
 
-Placeholder rule: inside clients/_template/ only, free-text values that still hold
+Placeholder rule: inside engine/template/ only, free-text values that still hold
 a placeholder ("{...}", "[...]", "YYYY-MM-DD") are accepted, and path and name
 cross-checks are skipped for them. Enumerated fields (type, confidence, status,
 strength, anchor_category, mass_instinct) must hold a real allowed value even in
@@ -30,9 +30,9 @@ from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-CLIENTS = ROOT / "clients"
-TEMPLATE_NAME = "_template"
+from brands import REPO_ROOT as ROOT, brand_dir, find_brands
+
+TEMPLATE_DIR = ROOT / "engine" / "template"
 
 TRACKER_HEADER = [
     "batch", "date", "concept", "testing-method", "sub-avatar", "core-avatar",
@@ -229,7 +229,7 @@ def check_profile_or_angle(path: Path, expected: str, client_dir: Path, in_templ
         match = THREE_QUESTIONS.search(text)
         if not match:
             report.warn(path, "no '**Three Questions:**' line in the Niche Gap section")
-        elif not is_placeholder(match.group(1)) and re.search(r"\bno\b", match.group(1), re.IGNORECASE):
+        elif not is_placeholder(match.group(1)) and re.search(r"\bno\b", re.sub(r"\([^)]*\)", "", match.group(1)), re.IGNORECASE):
             report.warn(path, "niche gap test has a 'no' answer; merge or justify this sub-avatar")
 
     if expected == "angle":
@@ -276,7 +276,7 @@ def check_tracker(path: Path, report: Report, stats: ClientStats) -> None:
 
 def check_client(client_dir: Path, report: Report) -> ClientStats:
     stats = ClientStats()
-    in_template = client_dir.name == TEMPLATE_NAME
+    in_template = client_dir.resolve() == TEMPLATE_DIR.resolve()
     avatars = client_dir / "avatars"
 
     if avatars.is_dir():
@@ -302,29 +302,26 @@ def check_client(client_dir: Path, report: Report) -> ClientStats:
     if tracker.exists():
         check_tracker(tracker, report, stats)
     else:
-        report.error(tracker, "missing creative tracker (copy it from clients/_template/testing/)")
+        report.error(tracker, "missing creative tracker (copy it from engine/template/testing/)")
     return stats
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--client", help="check only clients/{client}/")
+    parser.add_argument("--brand", "--client", dest="brand", help="check only {brand}/")
     args = parser.parse_args()
 
-    if args.client:
-        client_dirs = [CLIENTS / args.client]
-        if not client_dirs[0].is_dir():
-            print(f"check-knowledge: no such client directory: {rel(client_dirs[0])}")
-            return 1
+    if args.brand:
+        client_dirs = [brand_dir(args.brand)]
     else:
-        client_dirs = sorted(p for p in CLIENTS.iterdir() if p.is_dir() and not p.name.startswith("."))
+        client_dirs = find_brands() + [TEMPLATE_DIR]
 
     report = Report()
     summary: list[str] = []
     for client_dir in client_dirs:
         stats = check_client(client_dir, report)
         c = stats.counts
-        line = (f"  {client_dir.name}: {c['core-profile']} core profile(s), {c['sub-profile']} sub profile(s), "
+        line = (f"  {rel(client_dir)}: {c['core-profile']} core profile(s), {c['sub-profile']} sub profile(s), "
                 f"{c['angle']} angle(s), {stats.tracker}; {len(stats.not_frontmatter)} other avatar file(s) not frontmatter-checked")
         if stats.not_frontmatter:
             shown = ", ".join(stats.not_frontmatter[:5])
@@ -336,7 +333,7 @@ def main() -> int:
 
     for msg in report.errors + report.warnings:
         print(msg)
-    print(f"check-knowledge: {len(client_dirs)} client dir(s)")
+    print(f"check-knowledge: {len(client_dirs)} dir(s) checked")
     for line in summary:
         print(line)
     print(f"check-knowledge: {len(report.errors)} error(s), {len(report.warnings)} warning(s)")

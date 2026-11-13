@@ -34,7 +34,7 @@ Prompt templates for NanoBanana AI image generation. Each format is a reusable c
 
 Product and offer reference images live in client directories:
 
-- `clients/{name}/products/images/{product-slug}/` — individual product photos (cutout + styled)
-- `clients/{name}/offers/images/{offer-slug}/` — bundle/offer photos (cutout + styled)
+- `{brand}/products/images/{product-slug}/` — individual product photos (cutout + styled)
+- `{brand}/offers/images/{offer-slug}/` — bundle/offer photos (cutout + styled)
 
 Attach as reference when generating. Cutout images suit studio/minimal formats; styled images suit lifestyle formats.

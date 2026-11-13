@@ -1,4 +1,4 @@
-# Desires — {Client}
+# Desires: {Brand}
 
 Extracted from desire research. Living document.
 
@@ -10,4 +10,4 @@ Extracted from desire research. Living document.
 
 ## Top 5 by Power Score
 
-1. **desire-{slug}** ([score]) — [evidence]
+1. **desire-{slug}** ([score]): [evidence]

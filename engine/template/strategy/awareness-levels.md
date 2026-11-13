@@ -1,4 +1,4 @@
-# Awareness & Sophistication Levels — {Client}
+# Awareness & Sophistication Levels: {Brand}
 
 ## Awareness Levels (Eugene Schwartz)
 
@@ -6,7 +6,7 @@
 |-------|-----------|--------------------|--------------------|
 | **Unaware** | Doesn't know they have a problem | Create the problem | |
 | **Problem Aware** | Knows the problem, not the solutions | Educate on the solution category | |
-| **Solution Aware** | Knows solutions exist, doesn't know your product | Differentiate — "why THIS one" | |
+| **Solution Aware** | Knows solutions exist, doesn't know your product | Differentiate: "why THIS one" | |
 | **Product Aware** | Knows your product, hasn't bought yet | Overcome objections, provide offer | |
 | **Most Aware** | Knows your product well, needs a push | Offer, urgency, new product | |
 
@@ -17,4 +17,4 @@
 - **Stage:** [1 to 5, with the evidence: who else sells this, and the claims they already make]
 - **Chosen response:** [New mechanism / New information / New identity, and why]
 
-> Method: `../concepts/marketing-frameworks.md`. Angles must rest on the chosen response, not on bigger claims.
+> Method: `engine/method/marketing-frameworks.md`. Angles must rest on the chosen response, not on bigger claims.

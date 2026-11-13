@@ -32,7 +32,7 @@ Copy and fill in the placeholders below for each new test batch.
 (repeat structure)
 
 ### Execution
-- **Format:** [Static / Video / UGC — from concepts/formats/]
+- **Format:** [Static / Video / UGC — from engine/method/formats/]
 - **Awareness Level:** [Unaware → Most Aware]
 - **Platform:** Meta (Facebook + Instagram)
 - **Ad set shape (3:2:2):** 3 creatives, 2 primary texts, 2 headlines

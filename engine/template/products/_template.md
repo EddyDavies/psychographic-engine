@@ -1,7 +1,9 @@
 # [Product Name]
 
+> Copy this file to `{product-slug}.md` for each product, fill it in, then delete `_template.md` from your brand folder.
+
 ## Basics
-- **SKU:** [links to meta-ads DB `products.sku`]
+- **SKU:** [store SKU or product ID]
 - **Category:** [e.g. skincare, accessories, supplements]
 - **Price:** [retail price]
 - **URL:** [product page URL]
@@ -9,10 +11,10 @@
 ## How It Works
 [Plain-language explanation of what this product does and how the customer uses it. 2-3 sentences.]
 
-**6th grade version:** [X does Y, which causes Z. Ads borrow from this line. See `../concepts/offer-understanding.md`.]
+**6th grade version:** [X does Y, which causes Z. Ads borrow from this line. See `engine/method/offer-understanding.md`.]
 
 ## Features
-- [Objective feature 1 — what it IS, not what it does for the customer]
+- [Objective feature 1: what it IS, not what it does for the customer]
 - [Objective feature 2]
 - [Objective feature 3]
 
@@ -29,7 +31,7 @@
 
 ## Assumed Unique Mechanisms
 > What makes this product's approach different from competitors?
-- [Mechanism 1 — ingredient, process, technology, or approach]
+- [Mechanism 1: ingredient, process, technology, or approach]
 - [Mechanism 2]
 
 ## Assumed New Information

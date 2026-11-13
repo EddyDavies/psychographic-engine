@@ -14,7 +14,7 @@
 ### Language Register
 - **Formality:** [Formal / Semi-formal / Casual / Conversational]
 - **Jargon Policy:** [Use industry terms freely / Explain when used / Avoid entirely]
-- **Reading Level:** [Grade level or description, e.g. "8th grade — accessible but not dumbed down"]
+- **Reading Level:** [Grade level or description, e.g. "8th grade: accessible but not dumbed down"]
 - **Contractions:** [Yes / No / Sparingly]
 - **First Person:** [We / I / The brand name / Avoid]
 

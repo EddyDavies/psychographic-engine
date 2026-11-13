@@ -88,4 +88,4 @@ One brief per concept:
 9. **Asset folder:** every asset the ad needs in one place
 10. **Platform copy:** primary text 1 and 2, headline 1 and 2 (the 3:2:2 rule)
 
-Related: `angles-and-testing.md`, `copywriting.md`, `prompts/testing/process-learnings.md`.
+Related: `angles-and-testing.md`, `copywriting.md`, `engine/prompts/testing/process-learnings.md`.

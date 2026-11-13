@@ -6,7 +6,7 @@ import os
 import time
 from pathlib import Path
 
-PROJECT_ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).resolve().parent.parent))
+PROJECT_ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).resolve().parents[2]))
 ENV_PATH = PROJECT_ROOT / ".env"
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 IMAGE_MODEL = "google/gemini-3.1-flash-image-preview"
@@ -168,128 +168,8 @@ def recompose(
     return None
 
 
-DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive.file"]
-
-
 def load_manifest(manifest_path: Path) -> list[dict]:
     return json.loads(manifest_path.read_text())
-
-
-def get_drive_service():
-    """Build a Drive v3 service.
-
-    On Cloud Run (or when GOOGLE_APPLICATION_CREDENTIALS points to a SA key),
-    uses Application Default Credentials.  Locally without a SA key, falls back
-    to the interactive OAuth consent flow using GOOGLE_CLIENT_ID / SECRET so
-    that `ad_set_builder.py --upload` keeps working for the team.
-    """
-    from googleapiclient.discovery import build
-    import google_auth_httplib2
-    import httplib2
-
-    creds = _resolve_drive_credentials()
-    http = google_auth_httplib2.AuthorizedHttp(creds, http=httplib2.Http(timeout=300))
-    return build("drive", "v3", http=http)
-
-
-_DRIVE_TOKEN_PATH = PROJECT_ROOT / ".gdrive-token.json"
-
-
-def _resolve_drive_credentials():
-    """Try ADC first, then fall back to interactive OAuth."""
-    import google.auth
-    from google.auth.exceptions import DefaultCredentialsError
-
-    # 1. Try Application Default Credentials (Cloud Run SA, SA key file, gcloud ADC)
-    try:
-        creds, _ = google.auth.default(scopes=DRIVE_SCOPES)
-        return creds
-    except DefaultCredentialsError:
-        pass
-
-    # 2. Fall back to interactive OAuth (local dev)
-    client_id = get_env("GOOGLE_CLIENT_ID")
-    client_secret = get_env("GOOGLE_CLIENT_SECRET")
-    if not client_id or not client_secret:
-        raise RuntimeError(
-            "Drive credentials not found. Either:\n"
-            "  - Set GOOGLE_APPLICATION_CREDENTIALS to a service account key with Drive access, or\n"
-            "  - Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env for interactive OAuth, or\n"
-            "  - Run: gcloud auth application-default login --scopes=https://www.googleapis.com/auth/drive.file"
-        )
-
-    from google.oauth2.credentials import Credentials
-    from google.auth.transport.requests import Request
-    from google_auth_oauthlib.flow import InstalledAppFlow
-
-    creds = None
-    if _DRIVE_TOKEN_PATH.exists():
-        creds = Credentials.from_authorized_user_file(str(_DRIVE_TOKEN_PATH), DRIVE_SCOPES)
-
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            client_config = {
-                "installed": {
-                    "client_id": client_id,
-                    "client_secret": client_secret,
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                    "token_uri": "https://oauth2.googleapis.com/token",
-                    "redirect_uris": ["http://localhost"],
-                }
-            }
-            flow = InstalledAppFlow.from_client_config(client_config, DRIVE_SCOPES)
-            creds = flow.run_local_server(port=0)
-        _DRIVE_TOKEN_PATH.write_text(creds.to_json())
-
-    return creds
-
-
-DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive.file"]
-TOKEN_PATH = PROJECT_ROOT / ".gdrive-token.json"
-
-
-def get_google_credentials(scopes: list[str] | None = None) -> "Credentials":
-    """Authenticate with the requested Drive scopes and return credentials."""
-    from google.auth.transport.requests import Request
-    from google.oauth2.credentials import Credentials
-    from google_auth_oauthlib.flow import InstalledAppFlow
-
-    requested_scopes = scopes or DRIVE_SCOPES
-
-    creds = None
-    if TOKEN_PATH.exists():
-        stored = Credentials.from_authorized_user_file(str(TOKEN_PATH), requested_scopes)
-        if stored.has_scopes(requested_scopes):
-            creds = stored
-
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_config(
-                build_google_oauth_client_config(), requested_scopes
-            )
-            creds = flow.run_local_server(port=0)
-        TOKEN_PATH.write_text(creds.to_json())
-
-    return creds
-
-
-def get_google_services(scopes: list[str] | None = None) -> tuple["Resource", None]:
-    """Authenticate and return (drive_service, None).
-
-    Second element kept for call-site compatibility but is always None.
-    """
-    from googleapiclient.discovery import build
-    import google_auth_httplib2
-    import httplib2
-
-    creds = get_google_credentials(scopes)
-    http = google_auth_httplib2.AuthorizedHttp(creds, http=httplib2.Http(timeout=300))
-    drive = build("drive", "v3", http=http)
-    return drive, None
 
 
 def json_dump(data: object, path: Path) -> None:

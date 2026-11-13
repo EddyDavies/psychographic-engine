@@ -4,7 +4,7 @@ The 3-step process for turning avatar research into ready-made ad briefs.
 
 ## Step 1: Build Desire-Based Avatars
 
-Start with the Core 5 framework (see `../avatars/README.md`). Each core avatar is anchored by one primary desire mapped to a Mass Instinct.
+Start with the Core 5 framework (see `{brand}/avatars/README.md`). Each core avatar is anchored by one primary desire mapped to a Mass Instinct.
 
 ## Step 2: Break Into Sub-Avatars
 

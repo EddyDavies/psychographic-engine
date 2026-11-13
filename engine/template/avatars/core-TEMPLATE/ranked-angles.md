@@ -6,7 +6,7 @@
 
 Angles are grouped by offer (the product or bundle the ad sells), because an angle is one sub-avatar's reason to buy one offer. Within each offer, sub-avatars are ranked by strength: confidence in the profile plus how directly the offer answers their situation. Each sub-avatar gets 3 angles per offer (Evolve framework).
 
-> Format rules (read by `scripts/generate-ads.py`): keep sub-avatar headings as `## sub-{name}`, angle lines as `**Angle N: Name**`, the `Reason to Buy:` line, and the `-> [full angle](...)` link exactly as shown. Offer headings use `# Offer:` so they never collide with sub-avatar headings.
+> Format rules (read by `engine/scripts/generate-ads.py`): keep sub-avatar headings as `## sub-{name}`, angle lines as `**Angle N: Name**`, the `Reason to Buy:` line, and the `-> [full angle](...)` link exactly as shown. Offer headings use `# Offer:` so they never collide with sub-avatar headings.
 
 ---
 

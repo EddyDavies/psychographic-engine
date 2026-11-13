@@ -1,6 +1,6 @@
 # Test Learnings
 
-A learning names the sub-avatar, the angle, and the offer, and says why in psychographic terms. A format-only observation ("video beat static") is not a learning until it also records which reason to buy the winning format carried. See `prompts/testing/process-learnings.md`.
+A learning names the sub-avatar, the angle, and the offer, and says why in psychographic terms. A format-only observation ("video beat static") is not a learning until it also records which reason to buy the winning format carried. See `engine/prompts/testing/process-learnings.md`.
 
 ## Winners
 
@@ -12,7 +12,7 @@ A learning names the sub-avatar, the angle, and the offer, and says why in psych
 
 | Date | Batch | Sub-Avatar | Angle | Offer | Framework | Format | Key Metric | Loss Type | Why It Failed |
 |---|---|---|---|---|---|---|---|---|---|
-| [YYYY-MM-DD] | [batch-id] | [sub-avatar] | [angle name] | [offer] | [framework] | [format] | [metric + value] | [strategy / execution] | [hypothesis; for execution, the likely failure reason from concepts/execution.md] |
+| [YYYY-MM-DD] | [batch-id] | [sub-avatar] | [angle name] | [offer] | [framework] | [format] | [metric + value] | [strategy / execution] | [hypothesis; for execution, the likely failure reason from engine/method/execution.md] |
 
 ## Key Learnings
 

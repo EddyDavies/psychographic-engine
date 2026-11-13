@@ -1,6 +1,6 @@
 # Copywriting
 
-The method for static and text ads. Brand voice and no-gos still win where they are stricter (`../brand/guidelines/voice.md`, `../brand/no-gos/no-gos.md`). Video script structure is not covered here.
+The method for static and text ads. Brand voice and no-gos still win where they are stricter (`{brand}/brand/guidelines/voice.md`, `{brand}/brand/no-gos/no-gos.md`). Video script structure is not covered here.
 
 "The power of your copy is in direct proportion to the depth of your research." (Schwartz). Copy is how you communicate your understanding of the avatar back to them.
 
@@ -45,7 +45,7 @@ Cycle it once per objection. Body copy can run several cycles. The angle file's 
 
 ## Walk the awareness levels
 
-Every ad enters at the reader's awareness level and carries them through each level after it. See `../strategy/awareness-levels.md`. If the sub-avatar is unaware, the hook must not name the problem.
+Every ad enters at the reader's awareness level and carries them through each level after it. See `{brand}/strategy/awareness-levels.md`. If the sub-avatar is unaware, the hook must not name the problem.
 
 ## Hooks and headlines
 
@@ -94,7 +94,7 @@ Fernwood examples for the angle "the refill pods clean as hard as the bottle you
 1. Load the research, the target sub-avatar, and the product or offer file.
 2. Write nine headlines. For each: name the proven structure it borrows from (below), say why it stops this avatar's scroll, and give two iterations of the same idea.
 3. Pick the top three.
-4. Describe each image (layout, subject, text call outs) so a designer or renderer can build it. Visual concept templates are in `prompts/concepts/visual/`.
+4. Describe each image (layout, subject, text call outs) so a designer or renderer can build it. Visual concept templates are in `engine/prompts/concepts/visual/`.
 
 **Proven structures** from winning image ads. Borrow the mechanic, never another brand's identity.
 
