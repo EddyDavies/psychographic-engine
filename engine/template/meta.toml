@@ -29,6 +29,10 @@ special_ad_categories = []
 billing_event = "IMPRESSIONS"
 pixel_id = "123456789012345"
 conversion_event = "PURCHASE"        # PURCHASE, LEAD, COMPLETE_REGISTRATION, ADD_TO_CART ...
+# A custom event (for example a server event sent through the Conversions API)
+# is optimised through a custom conversion on it. Its numeric id replaces
+# conversion_event. Create it in Events Manager first.
+# custom_conversion_id = "1234567890"
 attribution_window_days = 7          # click through; conversion goals only
 
 [targeting]

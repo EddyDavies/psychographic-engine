@@ -119,8 +119,10 @@ def validate_config(cfg: dict) -> list[str]:
     if not isinstance(budget, int) or budget <= 0:
         errors.append("campaign.daily_budget must be a positive integer in minor units (5000 = 50.00)")
     goal = adset.get("optimization_goal") or OBJECTIVES.get(objective or "", "")
-    if goal == "OFFSITE_CONVERSIONS" and not (adset.get("pixel_id") and adset.get("conversion_event")):
-        errors.append("adset.pixel_id and adset.conversion_event are required to optimise for conversions")
+    if goal == "OFFSITE_CONVERSIONS" and not (adset.get("pixel_id") and (adset.get("conversion_event") or adset.get("custom_conversion_id"))):
+        errors.append("adset.pixel_id and one of adset.conversion_event or adset.custom_conversion_id are required to optimise for conversions")
+    if adset.get("custom_conversion_id") and not str(adset["custom_conversion_id"]).isdigit():
+        errors.append("adset.custom_conversion_id must be the numeric id of a custom conversion")
     if not targeting.get("countries"):
         errors.append("targeting.countries must list at least one country code")
     age_min, age_max = targeting.get("age_min", 18), targeting.get("age_max", 65)
@@ -317,7 +319,12 @@ def adset_payload(cfg: dict, adset: AdSetPlan, campaign_id: str) -> dict:
         "targeting": targeting_spec(cfg),
     }
     if goal == "OFFSITE_CONVERSIONS":
-        payload["promoted_object"] = {"pixel_id": str(a["pixel_id"]), "custom_event_type": a["conversion_event"]}
+        # A custom event (such as a server event sent through the Conversions API) is optimised through a custom conversion.
+        if a.get("custom_conversion_id"):
+            payload["promoted_object"] = {"pixel_id": str(a["pixel_id"]), "custom_event_type": "OTHER",
+                                          "custom_conversion_id": str(a["custom_conversion_id"])}
+        else:
+            payload["promoted_object"] = {"pixel_id": str(a["pixel_id"]), "custom_event_type": a["conversion_event"]}
         # Meta allows only a 1 day window on LINK_CLICKS sets, so this is conversions only.
         payload["attribution_spec"] = [{"event_type": "CLICK_THROUGH", "window_days": a.get("attribution_window_days", 7)}]
     dsa = cfg.get("dsa", {})
@@ -450,7 +457,11 @@ def print_plan(plan: Plan, cfg: dict, state: dict, mode: str, show_payloads: boo
     print(f"Campaign  {plan.campaign_name}" + (f"  [exists {existing}]" if existing else "  [new, PAUSED]"))
     print(f"  objective {c['objective']}  budget {money(c['daily_budget'], currency)}/day on the campaign (CBO)  bid {c.get('bid_strategy', 'LOWEST_COST_WITHOUT_CAP')}")
     goal = cfg.get("adset", {}).get("optimization_goal") or OBJECTIVES[c["objective"]]
-    print(f"  ad sets   optimise {goal}, countries {','.join(t['countries'])}, age {t.get('age_min', 18)} to {t.get('age_max', 65)}, "
+    if goal == "OFFSITE_CONVERSIONS":
+        a = cfg.get("adset", {})
+        target = f"custom conversion {a['custom_conversion_id']}" if a.get("custom_conversion_id") else a.get("conversion_event")
+        goal = f"{goal} on {target}"
+    print(f"  ad sets   optimise {goal},countries {','.join(t['countries'])}, age {t.get('age_min', 18)} to {t.get('age_max', 65)}, "
           f"placements {cfg.get('placements', {}).get('mode', 'advantage')}, advantage audience {'on' if t.get('advantage_audience') else 'off'}")
     if t.get("custom_audiences") or t.get("excluded_custom_audiences"):
         print(f"  audiences include {t.get('custom_audiences', [])} exclude {t.get('excluded_custom_audiences', [])}")
